@@ -1,0 +1,5 @@
+pentatrion_vite:
+    build:
+        public_prefix: /build
+        script_attributes:
+            defer: true
