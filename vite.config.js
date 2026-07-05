@@ -5,7 +5,9 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig({
     plugins: [
         vue(),
-        symfonyPlugin(),
+        symfonyPlugin({
+            refresh: ['templates/**/*.twig', 'src/**/*.php', 'config/**/*.yaml']
+        }),
     ],
     build: {
         rollupOptions: {

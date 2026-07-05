@@ -1,159 +1,168 @@
 <template>
-  <div class="min-h-screen bg-slate-50 flex">
-    <div class="hidden lg:flex lg:w-1/2 bg-slate-900 items-center justify-center relative overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
-      <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 32px 32px;" />
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex">
+    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 items-center justify-center relative overflow-hidden">
       <div class="absolute inset-0">
-        <div class="absolute -top-32 -right-32 w-96 h-96 bg-blue-500/20 rounded-full blur-[120px]" />
-        <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-indigo-500/20 rounded-full blur-[120px]" />
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-[100px]" />
+        <div class="absolute top-0 -left-40 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[150px]" />
+        <div class="absolute -bottom-32 -right-32 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[150px]" />
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-[120px]" />
       </div>
       <div class="relative px-16 text-center">
-        <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-blue-600/25">
-          <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
+        <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-blue-600/25 ring-1 ring-white/10">
+          <Shield class="w-10 h-10 text-white" />
         </div>
-        <h2 class="text-4xl font-bold text-slate-100 mb-4 tracking-tight">Symfony ACL</h2>
-        <p class="text-slate-400/80 text-lg max-w-sm mx-auto leading-relaxed">
+        <h2 class="text-4xl font-bold text-white mb-4 tracking-tight">Symfony ACL</h2>
+        <p class="text-slate-400 text-lg max-w-sm mx-auto leading-relaxed">
           Enterprise-grade Role-Based Access Control Management System
         </p>
-        <div class="mt-12 flex items-center justify-center gap-6 text-slate-500/60">
-          <div class="h-px w-12 bg-slate-700/60" />
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          <div class="h-px w-12 bg-slate-700/60" />
+        <div class="mt-12 flex items-center justify-center gap-4">
+          <div class="h-px w-16 bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
+          <div class="flex -space-x-1">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 ring-2 ring-slate-800" />
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 ring-2 ring-slate-800" />
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 ring-2 ring-slate-800" />
+          </div>
+          <div class="h-px w-16 bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
         </div>
+        <p class="mt-6 text-slate-500 text-sm">Trusted by security-conscious teams</p>
       </div>
     </div>
 
-    <div class="flex-1 flex items-center justify-center px-8 py-12 relative">
-      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-transparent to-transparent opacity-60" />
-      <div class="w-full max-w-sm relative">
-        <div class="lg:hidden flex items-center gap-3 mb-12">
+    <div class="flex-1 flex items-center justify-center px-4 py-8 relative">
+      <div class="w-full max-w-md relative">
+        <div class="lg:hidden flex items-center gap-3 mb-10">
           <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-md">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
+            <Shield class="w-5 h-5 text-white" />
           </div>
           <span class="text-xl font-bold text-slate-900 tracking-tight">Symfony ACL</span>
         </div>
 
-        <div>
-          <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Welcome back</h1>
-          <p class="text-slate-400 mt-2 mb-10">Sign in to your account to continue</p>
+        <div class="bg-white rounded-2xl shadow-[0_2px_40px_-8px_rgba(0,0,0,0.08)] p-8 sm:p-10">
+          <div class="mb-8">
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Welcome back</h1>
+            <p class="text-slate-500 mt-1.5">Sign in to your account to continue</p>
+          </div>
+
+          <form @submit.prevent="submit" class="space-y-5">
+            <div
+              v-if="error"
+              class="flex items-start gap-3 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl px-4 py-3.5 text-sm animate-shake"
+            >
+              <ShieldAlert class="w-5 h-5 shrink-0 mt-0.5" />
+              <div>
+                <p class="font-medium">Authentication failed</p>
+                <p class="text-rose-600/80 mt-0.5">{{ error }}</p>
+              </div>
+            </div>
+
+            <TextInput
+              id="email"
+              v-model="form.email"
+              type="email"
+              label="Email address"
+              placeholder="you@example.com"
+              :error="form.errors.email"
+              required
+            >
+              <template #icon>
+                <Mail class="w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              </template>
+            </TextInput>
+
+            <TextInput
+              id="password"
+              v-model="form.password"
+              type="password"
+              label="Password"
+              placeholder="Enter your password"
+              :error="form.errors.password"
+              required
+            >
+              <template #icon>
+                <Lock class="w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              </template>
+            </TextInput>
+
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <div class="relative flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    v-model="form.remember"
+                    class="peer sr-only"
+                  />
+                  <div class="w-4 h-4 rounded border border-slate-300 bg-white peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus:ring-2 peer-focus:ring-blue-500/20 transition-all group-hover:border-slate-400" />
+                  <Check class="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                </div>
+                <span class="text-sm text-slate-600 group-hover:text-slate-700 transition-colors select-none">Remember me</span>
+              </label>
+              <a
+                href="/reset-password"
+                class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+              >Reset password?</a>
+            </div>
+
+            <button
+              type="submit"
+              :disabled="form.processing"
+              class="relative w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl px-4 py-3 text-sm transition-all focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-blue-600/15 hover:shadow-blue-600/25 active:shadow-none active:translate-y-0.5 overflow-hidden"
+            >
+              <span class="relative z-10 flex items-center justify-center gap-2">
+                <span v-if="form.processing" class="flex items-center gap-2">
+                  <Loader2 class="animate-spin h-4 w-4" />
+                  Signing in...
+                </span>
+                <span v-else class="flex items-center gap-2">
+                  Sign in
+                  <ArrowRight class="w-4 h-4" />
+                </span>
+              </span>
+            </button>
+          </form>
+
+          <div class="mt-8 pt-6 border-t border-slate-100">
+            <p class="text-xs text-slate-400 text-center leading-relaxed">
+              Protected by enterprise-grade security.<br />
+              &copy; {{ new Date().getFullYear() }} Symfony ACL. All rights reserved.
+            </p>
+          </div>
         </div>
-
-        <form @submit.prevent="submit" class="space-y-5">
-          <div
-            v-if="error"
-            class="flex items-center gap-3 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl px-4 py-3.5 text-sm animate-fade-in"
-          >
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Invalid credentials. Please try again.</span>
-          </div>
-
-          <div>
-            <label for="email" class="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-            <div class="relative group">
-              <div class="absolute inset-0 rounded-xl bg-blue-500/10 opacity-0 group-focus-within:opacity-100 transition-opacity" />
-              <input
-                id="email"
-                v-model="form.email"
-                type="email"
-                autocomplete="email"
-                required
-                class="block w-full rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm pl-4 pr-4 py-3 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all text-sm relative"
-                placeholder="you@example.com"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label for="password" class="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
-            <div class="relative group">
-              <div class="absolute inset-0 rounded-xl bg-blue-500/10 opacity-0 group-focus-within:opacity-100 transition-opacity" />
-              <input
-                id="password"
-                v-model="form.password"
-                :type="showPassword ? 'text' : 'password'"
-                autocomplete="current-password"
-                required
-                class="block w-full rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm pl-4 pr-12 py-3 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all text-sm relative"
-                placeholder="Enter your password"
-              />
-              <button
-                type="button"
-                @click="showPassword = !showPassword"
-                class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-600 transition-colors z-10"
-                :aria-label="showPassword ? 'Hide password' : 'Show password'"
-              >
-                <svg v-if="showPassword" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                  <line x1="1" y1="1" x2="23" y2="23" />
-                  <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-                </svg>
-                <svg v-else class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            :disabled="form.processing"
-            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl px-4 py-3 text-sm transition-all focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30"
-          >
-            <span v-if="form.processing" class="flex items-center justify-center gap-2">
-              <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Signing in...
-            </span>
-            <span v-else>Sign in</span>
-          </button>
-        </form>
-
-        <p class="mt-12 text-center text-xs text-slate-400">
-          &copy; {{ new Date().getFullYear() }} Symfony ACL. All rights reserved.
-        </p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { Shield, ShieldAlert, Mail, Lock, Check, Loader2, ArrowRight } from 'lucide-vue-next'
+import TextInput from '../Components/UI/TextInput.vue'
 
 const props = defineProps({
   error: String,
   email: String,
 })
 
-const showPassword = ref(false)
-
 const form = reactive({
   email: props.email || '',
   password: '',
+  remember: false,
   processing: false,
+  errors: {},
 })
 
 function submit() {
   form.processing = true
+  form.errors = {}
   router.post('/login', {
     email: form.email,
     password: form.password,
+    _remember_me: form.remember,
   }, {
-    onError: () => {
+    onError: (errors) => {
       form.processing = false
+      if (errors.email || errors.password) {
+        form.errors = errors
+      }
     },
     onFinish: () => {
       form.processing = false

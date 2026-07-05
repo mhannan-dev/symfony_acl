@@ -1,1 +1,4 @@
 function Show-Tree($path, $indent="") { Get-ChildItem $path | Where-Object { $_.Name -notin "vendor", "node_modules", "var", ".git" } | ForEach-Object { Write-Host "$indent+-- $($_.Name)"; if ($_.PSIsContainer) { Show-Tree $_.FullName "$indent|  " } } }; Show-Tree .
+
+
+php -S 127.0.0.1:8000 -t public
