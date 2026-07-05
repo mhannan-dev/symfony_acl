@@ -1,4 +1,4 @@
-const BASE_URL = '/api'
+const BASE_URL = '/api/v1'
 
 interface ApiResponse<T = unknown> {
   data: T | null
@@ -34,6 +34,10 @@ async function request<T = unknown>(
     const json = JSON.parse(text)
 
     if (!res.ok) {
+      // Return detailed validation errors if it's a 422
+      if (res.status === 422 && json.errors) {
+        return { data: null, error: Object.values(json.errors)[0] as string || 'Validation failed' }
+      }
       return { data: null, error: json.error || json.message || 'Request failed' }
     }
 

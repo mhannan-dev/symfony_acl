@@ -11,7 +11,7 @@ export function useAuth() {
 
   async function fetchUser(): Promise<User | null> {
     const { get } = useApi()
-    const { data, error } = await get<{ user: User }>('/me')
+    const { data } = await get<{ user: User }>('/me')
     if (data?.user) {
       user.value = data.user
       return data.user

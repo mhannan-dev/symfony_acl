@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Api;
+namespace App\Controller\Api\V1;
 
 use App\DTO\LoginRequest;
 use App\Entity\User;
@@ -14,10 +14,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api')]
+#[Route('/api/v1')]
 class AuthController extends AbstractController
 {
-    #[Route('/login', name: 'api_login', methods: ['POST'])]
+    #[Route('/login', name: 'api_v1_login', methods: ['POST'])]
     public function login(
         LoginRequest $request,
         UserRepository $userRepository,
@@ -42,7 +42,7 @@ class AuthController extends AbstractController
         ]);
     }
 
-    #[Route('/me', name: 'api_me', methods: ['GET'])]
+    #[Route('/me', name: 'api_v1_me', methods: ['GET'])]
     public function me(): JsonResponse
     {
         /** @var User|null $user */
@@ -62,7 +62,7 @@ class AuthController extends AbstractController
         ]);
     }
 
-    #[Route('/logout', name: 'api_logout', methods: ['POST'])]
+    #[Route('/logout', name: 'api_v1_logout', methods: ['POST'])]
     public function logout(): JsonResponse
     {
         // Symfony's logout handler will intercept this

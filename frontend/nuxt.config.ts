@@ -14,6 +14,19 @@ export default defineNuxtConfig({
     },
   },
 
+  imports: {
+    dirs: [
+      'layers/shared/composables/**',
+      'layers/features/**/composables/**',
+    ],
+  },
+
+  components: [
+    { path: '~/app/components', pathPrefix: false },
+    { path: '~/layers/shared/components', pathPrefix: false },
+    { path: '~/layers/features', pattern: '*/components/**', pathPrefix: false },
+  ],
+
   css: ['~/assets/css/main.css'],
 
   app: {

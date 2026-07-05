@@ -264,7 +264,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         formats?: array<string, string|list<scalar|Param|null>>,
  *     },
  *     assets?: bool|array{ // Assets configuration
- *         enabled?: bool|Param, // Default: true
+ *         enabled?: bool|Param, // Default: false
  *         strict_mode?: bool|Param, // Throw an exception if an entry is missing from the manifest.json. // Default: false
  *         version_strategy?: scalar|Param|null, // Default: null
  *         version?: scalar|Param|null, // Default: null
@@ -472,7 +472,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     disallow_search_engine_index?: bool|Param, // Enabled by default when debug is enabled. // Default: true
  *     http_client?: bool|array{ // HTTP Client configuration
- *         enabled?: bool|Param, // Default: true
+ *         enabled?: bool|Param, // Default: false
  *         max_host_connections?: int|Param, // The maximum number of connections to a single host.
  *         default_options?: array{
  *             headers?: array<string, mixed>,
@@ -689,142 +689,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     json_streamer?: bool|array{ // JSON streamer configuration
  *         enabled?: bool|Param, // Default: false
  *     },
- * }
- * @psalm-type TwigConfig = array{
- *     form_themes?: list<scalar|Param|null>,
- *     globals?: array<string, array{ // Default: []
- *         id?: scalar|Param|null,
- *         type?: scalar|Param|null,
- *         value?: mixed,
- *     }>,
- *     autoescape_service?: scalar|Param|null, // Default: null
- *     autoescape_service_method?: scalar|Param|null, // Default: null
- *     base_template_class?: scalar|Param|null, // Deprecated: The child node "base_template_class" at path "twig.base_template_class" is deprecated.
- *     cache?: scalar|Param|null, // Default: true
- *     charset?: scalar|Param|null, // Default: "%kernel.charset%"
- *     debug?: bool|Param, // Default: "%kernel.debug%"
- *     strict_variables?: bool|Param, // Default: "%kernel.debug%"
- *     auto_reload?: scalar|Param|null,
- *     optimizations?: int|Param,
- *     default_path?: scalar|Param|null, // The default path used to load templates. // Default: "%kernel.project_dir%/templates"
- *     file_name_pattern?: string|list<scalar|Param|null>,
- *     paths?: array<string, mixed>,
- *     date?: array{ // The default format options used by the date filter.
- *         format?: scalar|Param|null, // Default: "F j, Y H:i"
- *         interval_format?: scalar|Param|null, // Default: "%d days"
- *         timezone?: scalar|Param|null, // The timezone used when formatting dates, when set to null, the timezone returned by date_default_timezone_get() is used. // Default: null
- *     },
- *     number_format?: array{ // The default format options for the number_format filter.
- *         decimals?: int|Param, // Default: 0
- *         decimal_point?: scalar|Param|null, // Default: "."
- *         thousands_separator?: scalar|Param|null, // Default: ","
- *     },
- *     mailer?: array{
- *         html_to_text_converter?: scalar|Param|null, // A service implementing the "Symfony\Component\Mime\HtmlToTextConverter\HtmlToTextConverterInterface". // Default: null
- *     },
- * }
- * @psalm-type TwigExtraConfig = array{
- *     cache?: bool|array{
- *         enabled?: bool|Param, // Default: false
- *     },
- *     html?: bool|array{
- *         enabled?: bool|Param, // Default: false
- *     },
- *     markdown?: bool|array{
- *         enabled?: bool|Param, // Default: false
- *     },
- *     intl?: bool|array{
- *         enabled?: bool|Param, // Default: false
- *     },
- *     cssinliner?: bool|array{
- *         enabled?: bool|Param, // Default: false
- *     },
- *     inky?: bool|array{
- *         enabled?: bool|Param, // Default: false
- *     },
- *     string?: bool|array{
- *         enabled?: bool|Param, // Default: false
- *     },
- *     commonmark?: array{
- *         renderer?: array{ // Array of options for rendering HTML.
- *             block_separator?: scalar|Param|null,
- *             inner_separator?: scalar|Param|null,
- *             soft_break?: scalar|Param|null,
- *         },
- *         html_input?: "strip"|"allow"|"escape"|Param, // How to handle HTML input.
- *         allow_unsafe_links?: bool|Param, // Remove risky link and image URLs by setting this to false. // Default: true
- *         max_nesting_level?: int|Param, // The maximum nesting level for blocks. // Default: 9223372036854775807
- *         max_delimiters_per_line?: int|Param, // The maximum number of strong/emphasis delimiters per line. // Default: 9223372036854775807
- *         slug_normalizer?: array{ // Array of options for configuring how URL-safe slugs are created.
- *             instance?: mixed,
- *             max_length?: int|Param, // Default: 255
- *             unique?: mixed,
- *         },
- *         commonmark?: array{ // Array of options for configuring the CommonMark core extension.
- *             enable_em?: bool|Param, // Default: true
- *             enable_strong?: bool|Param, // Default: true
- *             use_asterisk?: bool|Param, // Default: true
- *             use_underscore?: bool|Param, // Default: true
- *             unordered_list_markers?: list<scalar|Param|null>,
- *         },
- *         ...<string, mixed>
- *     },
- * }
- * @psalm-type WebpackEncoreConfig = array{
- *     output_path?: scalar|Param|null, // The path where Encore is building the assets - i.e. Encore.setOutputPath()
- *     crossorigin?: false|"anonymous"|"use-credentials"|Param, // crossorigin value when Encore.enableIntegrityHashes() is used, can be false (default), anonymous or use-credentials // Default: false
- *     preload?: bool|Param, // preload all rendered script and link tags automatically via the http2 Link header. // Default: false
- *     cache?: bool|Param, // Enable caching of the entry point file(s) // Default: false
- *     strict_mode?: bool|Param, // Throw an exception if the entrypoints.json file is missing or an entry is missing from the data // Default: true
- *     builds?: array<string, scalar|Param|null>,
- *     script_attributes?: array<string, scalar|Param|null>,
- *     link_attributes?: array<string, scalar|Param|null>,
- * }
- * @psalm-type InertiaConfig = array{
- *     root_view?: scalar|Param|null, // Default: "base.html.twig"
- *     ssr?: array{
- *         enabled?: bool|Param, // Default: false
- *         url?: scalar|Param|null, // Default: ""
- *     },
- *     csrf?: array{
- *         enabled?: bool|Param, // Default: true
- *         cookie_name?: scalar|Param|null, // Default: "XSRF-TOKEN"
- *         header_name?: scalar|Param|null, // Default: "X-XSRF-TOKEN"
- *         expire?: scalar|Param|null, // Default: 0
- *         path?: scalar|Param|null, // Default: "/"
- *         domain?: scalar|Param|null, // Default: null
- *         secure?: scalar|Param|null, // Default: false
- *         raw?: scalar|Param|null, // Default: false
- *         samesite?: scalar|Param|null, // Default: "lax"
- *     },
- * }
- * @psalm-type PentatrionViteConfig = array{
- *     public_directory?: scalar|Param|null, // Default: "public"
- *     build_directory?: scalar|Param|null, // we only need build_directory to locate entrypoints.json file, it's the "base" vite config parameter without slashes. // Default: "build"
- *     proxy_origin?: scalar|Param|null, // Allows to use different origin for asset proxy, eg. http://host.docker.internal:5173 // Default: null
- *     absolute_url?: bool|Param, // Prepend the rendered link and script tags with an absolute URL. // Default: false
- *     throw_on_missing_entry?: scalar|Param|null, // Throw exception when entry is not present in the entrypoints file // Default: false
- *     throw_on_missing_asset?: scalar|Param|null, // Throw exception when asset is not present in the manifest file // Default: true
- *     cache?: bool|Param, // Enable caching of the entry point file(s) // Default: false
- *     preload?: "none"|"link-tag"|"link-header"|Param, // preload all rendered script and link tags automatically via the http2 Link header. (symfony/web-link is required) Instead <link rel="modulepreload"> will be used. // Default: "link-tag"
- *     crossorigin?: false|true|"anonymous"|"use-credentials"|Param, // crossorigin value, can be false, true (default), anonymous (same as true) or use-credentials // Default: true
- *     script_attributes?: list<scalar|Param|null>,
- *     link_attributes?: list<scalar|Param|null>,
- *     preload_attributes?: list<scalar|Param|null>,
- *     default_build?: scalar|Param|null, // Deprecated: The "default_build" option is deprecated. Use "default_config" instead. // Default: null
- *     builds?: array<string, array{ // Default: []
- *         build_directory?: scalar|Param|null, // Default: "build"
- *         script_attributes?: list<scalar|Param|null>,
- *         link_attributes?: list<scalar|Param|null>,
- *         preload_attributes?: list<scalar|Param|null>,
- *     }>,
- *     default_config?: scalar|Param|null, // Default: null
- *     configs?: array<string, array{ // Default: []
- *         build_directory?: scalar|Param|null, // Default: "build"
- *         script_attributes?: list<scalar|Param|null>,
- *         link_attributes?: list<scalar|Param|null>,
- *         preload_attributes?: list<scalar|Param|null>,
- *     }>,
  * }
  * @psalm-type DoctrineConfig = array{
  *     dbal?: array{
@@ -1434,11 +1298,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     parameters?: ParametersConfig,
  *     services?: ServicesConfig,
  *     framework?: FrameworkConfig,
- *     twig?: TwigConfig,
- *     twig_extra?: TwigExtraConfig,
- *     webpack_encore?: WebpackEncoreConfig,
- *     inertia?: InertiaConfig,
- *     pentatrion_vite?: PentatrionViteConfig,
  *     doctrine?: DoctrineConfig,
  *     security?: SecurityConfig,
  *     doctrine_migrations?: DoctrineMigrationsConfig,
@@ -1449,11 +1308,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         parameters?: ParametersConfig,
  *         services?: ServicesConfig,
  *         framework?: FrameworkConfig,
- *         twig?: TwigConfig,
- *         twig_extra?: TwigExtraConfig,
- *         webpack_encore?: WebpackEncoreConfig,
- *         inertia?: InertiaConfig,
- *         pentatrion_vite?: PentatrionViteConfig,
  *         doctrine?: DoctrineConfig,
  *         security?: SecurityConfig,
  *         maker?: MakerConfig,
@@ -1466,11 +1320,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         parameters?: ParametersConfig,
  *         services?: ServicesConfig,
  *         framework?: FrameworkConfig,
- *         twig?: TwigConfig,
- *         twig_extra?: TwigExtraConfig,
- *         webpack_encore?: WebpackEncoreConfig,
- *         inertia?: InertiaConfig,
- *         pentatrion_vite?: PentatrionViteConfig,
  *         doctrine?: DoctrineConfig,
  *         security?: SecurityConfig,
  *         doctrine_migrations?: DoctrineMigrationsConfig,
@@ -1482,11 +1331,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         parameters?: ParametersConfig,
  *         services?: ServicesConfig,
  *         framework?: FrameworkConfig,
- *         twig?: TwigConfig,
- *         twig_extra?: TwigExtraConfig,
- *         webpack_encore?: WebpackEncoreConfig,
- *         inertia?: InertiaConfig,
- *         pentatrion_vite?: PentatrionViteConfig,
  *         doctrine?: DoctrineConfig,
  *         security?: SecurityConfig,
  *         doctrine_migrations?: DoctrineMigrationsConfig,
