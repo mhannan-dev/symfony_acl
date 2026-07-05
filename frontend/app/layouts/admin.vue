@@ -1,83 +1,113 @@
 <template>
-  <div class="min-h-screen bg-slate-50 flex">
-    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col">
-      <div class="flex items-center gap-3 px-6 h-16 border-b border-slate-800">
-        <NuxtLink to="/dashboard" class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
+  <div class="antialiased bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <!-- Top Navbar -->
+    <nav class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
+      <div class="flex flex-wrap justify-between items-center">
+        <div class="flex justify-start items-center">
+          <!-- Mobile Sidebar Toggle -->
+          <button @click="isSidebarOpen = !isSidebarOpen" class="p-2 mr-2 text-gray-600 rounded-lg cursor-pointer md:hidden hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700 focus:ring-2 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+            <Icon name="heroicons:bars-3" class="w-6 h-6" />
+            <span class="sr-only">Toggle sidebar</span>
+          </button>
+          
+          <NuxtLink to="/dashboard" class="flex items-center justify-between mr-4 gap-3">
+            <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center shrink-0">
+              <Icon name="heroicons:shield-check-solid" class="w-5 h-5 text-white" />
+            </div>
+            <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">Symfony ACL</span>
+          </NuxtLink>
+        </div>
+        
+        <div class="flex items-center lg:order-2">
+          <!-- User Profile Dropdown Menu -->
+          <div class="relative">
+            <button @click="isUserMenuOpen = !isUserMenuOpen" type="button" class="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 transition-all hover:ring-4 hover:ring-gray-200 dark:hover:ring-gray-700">
+              <span class="sr-only">Open user menu</span>
+              <img class="w-8 h-8 rounded-full" :src="'https://ui-avatars.com/api/?name=' + (user?.name || 'Admin') + '&background=1d4ed8&color=fff'" alt="user photo" />
+            </button>
+            
+            <!-- Dropdown content -->
+            <div v-show="isUserMenuOpen" class="absolute right-0 z-50 my-4 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 transition-all origin-top-right" style="top: 100%; margin-top: 0.5rem; min-width: 12rem;">
+              <div class="py-3 px-4">
+                <span class="block text-sm font-semibold text-gray-900 dark:text-white">{{ user?.name || 'Admin User' }}</span>
+                <span class="block text-sm font-light text-gray-500 truncate dark:text-gray-400">{{ user?.email || 'admin@example.com' }}</span>
+              </div>
+              <ul class="py-1 font-light text-gray-500 dark:text-gray-400">
+                <li>
+                  <a href="#" class="flex items-center gap-2 py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                    <Icon name="heroicons:user-circle" class="w-4 h-4" />
+                    My profile
+                  </a>
+                </li>
+              </ul>
+              <ul class="py-1 font-light text-gray-500 dark:text-gray-400">
+                <li>
+                  <button @click="logout()" class="flex w-full text-left items-center gap-2 py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white transition-colors">
+                    <Icon name="heroicons:arrow-right-on-rectangle" class="w-4 h-4" />
+                    Sign out
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
-          <span class="text-lg font-semibold text-slate-100">Symfony ACL</span>
-        </NuxtLink>
+        </div>
       </div>
+    </nav>
 
-      <nav class="flex-1 px-3 py-4 space-y-1">
-        <NuxtLink
-          v-for="item in navItems"
-          :key="item.href"
-          :to="item.href"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
-          :class="isActive(item.href) ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'"
-        >
-          <svg v-if="item.icon === 'dashboard'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-          <svg v-else-if="item.icon === 'users'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-          </svg>
-          <svg v-else-if="item.icon === 'groups'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <svg v-else-if="item.icon === 'permissions'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-          <svg v-else-if="item.icon === 'content'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
-          <svg v-else-if="item.icon === 'activity'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-          </svg>
-          {{ item.label }}
-        </NuxtLink>
-      </nav>
-
-      <div class="px-3 py-4 border-t border-slate-800">
-        <button @click="handleLogout" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 w-full transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Sign out
-        </button>
+    <!-- Collapsible Sidebar -->
+    <aside :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed top-0 left-0 z-40 w-64 h-screen pt-16 transition-transform bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidenav">
+      <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800 flex flex-col justify-between">
+        <ul class="space-y-2">
+          <li v-for="item in navItems" :key="item.href">
+            <NuxtLink
+              :to="item.href"
+              class="flex items-center p-2 text-base font-medium rounded-lg transition-colors group"
+              :class="isActive(item.href) ? 'bg-primary-50 text-primary-700 dark:bg-gray-700 dark:text-white' : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'"
+            >
+              <Icon 
+                :name="item.icon" 
+                class="w-6 h-6 transition duration-75" 
+                :class="isActive(item.href) ? 'text-primary-700 dark:text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'" 
+              />
+              <span class="ml-3">{{ item.label }}</span>
+            </NuxtLink>
+          </li>
+        </ul>
       </div>
     </aside>
 
-    <main class="flex-1 overflow-auto">
-      <div class="p-8">
-        <slot />
-      </div>
+    <!-- Main Content Area -->
+    <main class="p-4 md:ml-64 h-auto pt-20">
+      <slot />
     </main>
+    
+    <!-- Mobile Sidebar Backdrop -->
+    <div v-if="isSidebarOpen" @click="isSidebarOpen = false" class="bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-30 md:hidden"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-const route = useRoute()
-const auth = useAuth()
+import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useAuth } from '../../layers/features/auth/composables/useAuth'
 
+const route = useRoute()
+const { user, logout } = useAuth()
+
+const isSidebarOpen = ref(false)
+const isUserMenuOpen = ref(false)
+
+// Used exclusively @nuxt/icon components instead of raw SVGs
 const navItems = [
-  { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-  { label: 'Users', href: '/users', icon: 'users' },
-  { label: 'Groups', href: '/groups', icon: 'groups' },
-  { label: 'Permissions', href: '/permissions', icon: 'permissions' },
-  { label: 'Content Types', href: '/content-types', icon: 'content' },
-  { label: 'Activity Logs', href: '/activity-logs', icon: 'activity' },
+  { label: 'Dashboard', href: '/dashboard', icon: 'heroicons:home' },
+  { label: 'Users', href: '/users', icon: 'heroicons:users' },
+  { label: 'Groups', href: '/groups', icon: 'heroicons:user-group' },
+  { label: 'Permissions', href: '/permissions', icon: 'heroicons:key' },
+  { label: 'Content Types', href: '/content-types', icon: 'heroicons:document-text' },
+  { label: 'Activity Logs', href: '/activity-logs', icon: 'heroicons:clock' },
 ]
 
 function isActive(href: string): boolean {
-  return route.path.startsWith(href)
-}
-
-async function handleLogout() {
-  await auth.logout()
+  return route.path === href || route.path.startsWith(href + '/')
 }
 </script>

@@ -51,13 +51,25 @@
           <span v-if="isLoginPending">Signing in...</span>
           <span v-else>Sign in</span>
         </button>
+        
+        <div class="relative flex items-center justify-center w-full mt-4 border-t border-gray-200 dark:border-gray-700">
+          <span class="absolute px-3 font-medium text-gray-500 bg-white dark:text-gray-400 dark:bg-gray-800 -top-3">or</span>
+        </div>
+        
+        <button type="button" @click="fillDemoCredentials" class="w-full mt-4 text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 flex items-center justify-center gap-2 transition-colors">
+          <Icon name="heroicons:bolt-solid" class="w-4 h-4 text-yellow-400" />
+          Quick Login Demo
+        </button>
       </form>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseInput from '../../../shared/components/BaseInput.vue'
+import { useAuth } from '../composables/useAuth'
 
 const { login, isLoginPending } = useAuth()
 const router = useRouter()
@@ -69,6 +81,11 @@ const form = reactive({
 })
 
 const error = ref('')
+
+function fillDemoCredentials() {
+  form.email = 'admin@yopmail.com'
+  form.password = 'Test@1234'
+}
 
 async function submit() {
   error.value = ''

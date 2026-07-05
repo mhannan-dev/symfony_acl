@@ -110,3 +110,5 @@ erDiagram
     User ||--o{ ActivityLog : "performs"
     ContentType ||--o{ ActivityLog : "tracks"
 ```
+
+

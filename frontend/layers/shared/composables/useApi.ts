@@ -31,7 +31,13 @@ async function request<T = unknown>(
 
     const text = await res.text()
     if (!text) return { data: null as T, error: null }
-    const json = JSON.parse(text)
+    let json;
+    try {
+      json = JSON.parse(text)
+    } catch (e) {
+      console.error('API Response is not JSON:', text);
+      return { data: null, error: `Server returned non-JSON: ${text.substring(0, 100)}...` }
+    }
 
     if (!res.ok) {
       // Return detailed validation errors if it's a 422
@@ -41,7 +47,7 @@ async function request<T = unknown>(
       return { data: null, error: json.error || json.message || 'Request failed' }
     }
 
-    return { data: json as T, error: null }
+    return { data: (json.status === 'success' && 'data' in json) ? json.data as T : json as T, error: null }
   } catch (err) {
     return { data: null, error: err instanceof Error ? err.message : 'Network error' }
   }

@@ -8,7 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/activity-logs')]
+#[Route('/api/v1/activity-logs')]
 class ActivityLogController extends AbstractController
 {
     #[Route('', name: 'api_activity_logs_list', methods: ['GET'])]

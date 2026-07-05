@@ -2,12 +2,12 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-slate-900">Users</h1>
-      <NuxtLink to="/users/new" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg px-4 py-2 transition-colors">
+      <CreateButton to="/users/new" icon="heroicons:user-plus">
         Add User
-      </NuxtLink>
+      </CreateButton>
     </div>
 
-    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mt-6">
       <table class="w-full">
         <thead>
           <tr class="border-b border-slate-200 bg-slate-50">
@@ -27,9 +27,9 @@
               </span>
               <span v-if="!user.userGroups.length" class="text-slate-400">&mdash;</span>
             </td>
-            <td class="px-6 py-4 text-right">
-              <NuxtLink :to="`/users/${user.id}`" class="text-sm text-blue-600 hover:text-blue-800 font-medium mr-3">Edit</NuxtLink>
-              <button @click="deleteUser(user.id)" class="text-sm text-rose-600 hover:text-rose-800 font-medium">Delete</button>
+            <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
+              <ActionIconButton :to="`/users/${user.id}`" icon="heroicons:pencil-square" title="Edit" color="blue" />
+              <ActionIconButton @click="confirmDelete(user.id)" icon="heroicons:trash" title="Delete" color="red" />
             </td>
           </tr>
           <tr v-if="!users.length">
@@ -38,10 +38,18 @@
         </tbody>
       </table>
     </div>
+
+    <ConfirmModal 
+      v-model="isDeleteModalOpen" 
+      message="Are you sure you want to delete this user? This action cannot be undone."
+      @confirm="executeDelete"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
 definePageMeta({
   layout: 'admin',
   middleware: 'auth',
@@ -50,15 +58,25 @@ definePageMeta({
 const { get, del } = useApi()
 const users = ref<any[]>([])
 
+const isDeleteModalOpen = ref(false)
+const itemToDelete = ref<number | null>(null)
+
 onMounted(async () => {
   const { data } = await get<{ users: any[] }>('/users')
   if (data?.users) users.value = data.users
 })
 
-async function deleteUser(id: number) {
-  if (confirm('Are you sure you want to delete this user?')) {
-    await del(`/users/${id}/delete`)
-    users.value = users.value.filter(u => u.id !== id)
+function confirmDelete(id: number) {
+  itemToDelete.value = id
+  isDeleteModalOpen.value = true
+}
+
+async function executeDelete() {
+  if (itemToDelete.value) {
+    await del(`/users/${itemToDelete.value}/delete`)
+    users.value = users.value.filter(u => u.id !== itemToDelete.value)
+    isDeleteModalOpen.value = false
+    itemToDelete.value = null
   }
 }
 </script>

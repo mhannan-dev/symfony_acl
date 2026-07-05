@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/content-types')]
+#[Route('/api/v1/content-types')]
 class ContentTypeController extends AbstractController
 {
     public function __construct(

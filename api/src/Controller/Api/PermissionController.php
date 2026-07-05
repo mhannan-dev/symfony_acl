@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/permissions')]
+#[Route('/api/v1/permissions')]
 class PermissionController extends AbstractController
 {
     public function __construct(

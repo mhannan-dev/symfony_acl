@@ -10,7 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api')]
+#[Route('/api/v1')]
 class DashboardController extends AbstractController
 {
     #[Route('/dashboard/stats', name: 'api_dashboard_stats', methods: ['GET'])]
