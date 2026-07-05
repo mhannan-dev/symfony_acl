@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace App\Exception;
 
-use RuntimeException;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
-class InertiaValidationException extends RuntimeException
+class ApiValidationException extends \RuntimeException
 {
     public function __construct(
-        private readonly ConstraintViolationListInterface $violations
+        private readonly ConstraintViolationListInterface $violations,
     ) {
-        parent::__construct('Inertia form validation failed.');
+        parent::__construct('Validation failed.');
     }
 
     public function getViolations(): ConstraintViolationListInterface

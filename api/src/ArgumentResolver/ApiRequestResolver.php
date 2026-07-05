@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\ArgumentResolver;
 
-use App\DTO\InertiaRequestInterface;
-use App\Exception\InertiaValidationException;
+use App\DTO\ApiRequestInterface;
+use App\Exception\ApiValidationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class InertiaRequestResolver implements ValueResolverInterface
+class ApiRequestResolver implements ValueResolverInterface
 {
     public function __construct(
         private readonly SerializerInterface $serializer,
@@ -23,7 +23,7 @@ class InertiaRequestResolver implements ValueResolverInterface
     {
         $type = $argument->getType();
 
-        if (!$type || !is_subclass_of($type, InertiaRequestInterface::class)) {
+        if (!$type || !is_subclass_of($type, ApiRequestInterface::class)) {
             return [];
         }
 
@@ -39,7 +39,7 @@ class InertiaRequestResolver implements ValueResolverInterface
         $violations = $this->validator->validate($dto);
 
         if (count($violations) > 0) {
-            throw new InertiaValidationException($violations);
+            throw new ApiValidationException($violations);
         }
 
         return [$dto];

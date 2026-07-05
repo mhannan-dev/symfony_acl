@@ -6,7 +6,7 @@ namespace App\DTO;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-class LoginRequest implements InertiaRequestInterface
+class LoginRequest implements ApiRequestInterface
 {
     #[Assert\NotBlank(message: 'Email address is required.')]
     #[Assert\Email(message: 'Please provide a valid email address.')]
@@ -14,6 +14,6 @@ class LoginRequest implements InertiaRequestInterface
 
     #[Assert\NotBlank(message: 'Password is required.')]
     public string $password = '';
-    
+
     public bool $remember = false;
 }
