@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\EventSubscriber;
 
-use Rompetomp\InertiaBundle\Service\InertiaInterface;
+use Rompetomp\InertiaBundle\Architecture\InertiaInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -41,7 +41,7 @@ class InertiaSharedPropsSubscriber implements EventSubscriberInterface
         $errors = (object)[];
         
         if ($session->getFlashBag()->has('inertia_errors')) {
-            $flashedErrors = $session->getFlashBag()->get('inertia_errors')[0] ?? [];
+            $flashedErrors = $session->getFlashBag()->peek('inertia_errors')[0] ?? [];
             if (!empty($flashedErrors)) {
                 $errors = $flashedErrors;
             }

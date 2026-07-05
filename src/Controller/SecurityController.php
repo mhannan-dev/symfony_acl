@@ -17,14 +17,23 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 class SecurityController extends AbstractController
 {
     #[Route(path: '/login', name: 'app_login', methods: ['GET'])]
-    public function login(AuthenticationUtils $authenticationUtils, InertiaInterface $inertia): Response
+    public function login(AuthenticationUtils $authenticationUtils, InertiaInterface $inertia, Request $request): Response
     {
         if ($this->getUser()) {
             return $this->redirectToRoute('app_home');
         }
 
+        $errors = (object)[];
+        if ($request && $request->hasSession() && $request->getSession()->getFlashBag()->has('inertia_errors')) {
+            $flashed = $request->getSession()->getFlashBag()->get('inertia_errors')[0] ?? [];
+            if (!empty($flashed)) {
+                $errors = $flashed;
+            }
+        }
+
         return $inertia->render('Login', [
             'email' => $authenticationUtils->getLastUsername(),
+            'errors' => $errors,
         ]);
     }
 

@@ -122,55 +122,24 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { useForm } from '@inertiajs/vue3'
 import { Shield, ShieldAlert, Mail, Lock, Check, Loader2, ArrowRight } from 'lucide-vue-next'
 import TextInput from '../Components/UI/TextInput.vue'
 
 const props = defineProps({
-  error: String,
   email: String,
 })
 
-const form = reactive({
+const form = useForm({
   email: props.email || '',
   password: '',
   remember: false,
-  processing: false,
-  errors: {},
 })
 
-// Map Symfony's global authentication error to the email field validation
-watch(() => props.error, (newError) => {
-  if (newError) {
-    form.errors.email = newError
-  }
-}, { immediate: true })
-
 function submit() {
-  form.processing = true
-  form.errors = {}
-  
-  // Symfony's form_login expects standard form data (multipart/form-data or application/x-www-form-urlencoded)
-  // Inertia sends JSON by default, which form_login cannot read. 
-  // We use FormData here to force a multipart/form-data request so Symfony can authenticate properly!
-  const formData = new FormData()
-  formData.append('email', form.email)
-  formData.append('password', form.password)
-  if (form.remember) {
-    formData.append('_remember_me', 'on')
-  }
-
-  router.post('/login', formData, {
-    onError: (errors) => {
-      form.processing = false
-      if (errors.email || errors.password) {
-        form.errors = errors
-      }
-    },
-    onFinish: () => {
-      form.processing = false
-    },
+  form.post('/login', {
+    preserveScroll: true,
+    onFinish: () => form.reset('password'),
   })
 }
 </script>
