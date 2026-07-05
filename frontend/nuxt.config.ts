@@ -2,7 +2,10 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: [
+    '@nuxtjs/tailwindcss',
+    '@nuxt/icon'
+  ],
 
   nitro: {
     devProxy: {
@@ -16,15 +19,15 @@ export default defineNuxtConfig({
 
   imports: {
     dirs: [
-      'layers/shared/composables/**',
-      'layers/features/**/composables/**',
+      '~~/layers/shared/composables/**',
+      '~~/layers/features/**/composables/**',
     ],
   },
 
   components: [
-    { path: '~/app/components', pathPrefix: false },
-    { path: '~/layers/shared/components', pathPrefix: false },
-    { path: '~/layers/features', pattern: '*/components/**', pathPrefix: false },
+    { path: '~/components', pathPrefix: false },
+    { path: '~~/layers/shared/components', pathPrefix: false },
+    { path: '~~/layers/features/auth/components', pathPrefix: false },
   ],
 
   css: ['~/assets/css/main.css'],
