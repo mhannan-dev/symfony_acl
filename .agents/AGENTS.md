@@ -70,3 +70,14 @@ public function setUserRepository(UserRepository $userRepository) { ... }
 - Avoid code shortcuts, facades, or legacy patterns.
 - Ensure a clear separation of concerns (Controllers only handle requests/responses, business logic goes into Services, and database queries live in Repositories).
 - Write highly scannable, clean code with brief, meaningful comments where necessary.
+
+### 7. Form Validation
+- Always show error messages just at the bottom of each input field only.
+- Do not use global alert boxes or popups for form validation errors.
+- **Always ensure error messages are human-readable and user-friendly (e.g., properly translate technical error keys).**
+
+### 8. Inertia Form Request Validation
+- For all form submissions, create a DTO in `src/DTO/` that implements `App\DTO\InertiaRequestInterface` (e.g., `LoginRequest`).
+- Define validation rules directly on the DTO properties using Symfony Validator attributes (`#[Assert\...]`).
+- Inject the DTO directly into your Controller action. The custom `InertiaRequestResolver` will automatically deserialize the request, run validations, and flash any errors back to the Vue frontend.
+- **Never** manually validate request data inside the controller. Rely entirely on the DTO and the automated resolver architecture.

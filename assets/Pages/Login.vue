@@ -43,16 +43,6 @@
           </div>
 
           <form @submit.prevent="submit" class="space-y-5">
-            <div
-              v-if="error"
-              class="flex items-start gap-3 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl px-4 py-3.5 text-sm animate-shake"
-            >
-              <ShieldAlert class="w-5 h-5 shrink-0 mt-0.5" />
-              <div>
-                <p class="font-medium">Authentication failed</p>
-                <p class="text-rose-600/80 mt-0.5">{{ error }}</p>
-              </div>
-            </div>
 
             <TextInput
               id="email"
@@ -61,7 +51,7 @@
               label="Email address"
               placeholder="you@example.com"
               :error="form.errors.email"
-              required
+              
             >
               <template #icon>
                 <Mail class="w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
@@ -75,7 +65,7 @@
               label="Password"
               placeholder="Enter your password"
               :error="form.errors.password"
-              required
+              
             >
               <template #icon>
                 <Lock class="w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
@@ -132,7 +122,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { Shield, ShieldAlert, Mail, Lock, Check, Loader2, ArrowRight } from 'lucide-vue-next'
 import TextInput from '../Components/UI/TextInput.vue'
@@ -150,14 +140,28 @@ const form = reactive({
   errors: {},
 })
 
+// Map Symfony's global authentication error to the email field validation
+watch(() => props.error, (newError) => {
+  if (newError) {
+    form.errors.email = newError
+  }
+}, { immediate: true })
+
 function submit() {
   form.processing = true
   form.errors = {}
-  router.post('/login', {
-    email: form.email,
-    password: form.password,
-    _remember_me: form.remember,
-  }, {
+  
+  // Symfony's form_login expects standard form data (multipart/form-data or application/x-www-form-urlencoded)
+  // Inertia sends JSON by default, which form_login cannot read. 
+  // We use FormData here to force a multipart/form-data request so Symfony can authenticate properly!
+  const formData = new FormData()
+  formData.append('email', form.email)
+  formData.append('password', form.password)
+  if (form.remember) {
+    formData.append('_remember_me', 'on')
+  }
+
+  router.post('/login', formData, {
     onError: (errors) => {
       form.processing = false
       if (errors.email || errors.password) {
