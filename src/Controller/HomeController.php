@@ -12,6 +12,8 @@ class HomeController extends AbstractController
     #[Route('/', name: 'app_home')]
     public function index(InertiaInterface $inertia): Response
     {
-        return $inertia->render('Home');
+        return $inertia->render('Home', [
+            'isAuthenticated' => $this->getUser() !== null,
+        ]);
     }
 }
