@@ -2,9 +2,19 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-slate-900">Users</h1>
-      <CreateButton to="/users/new" icon="heroicons:user-plus">
-        Add User
-      </CreateButton>
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <Icon name="heroicons:magnifying-glass" class="w-5 h-5 text-gray-500" />
+          </div>
+          <input type="text" v-model="searchQuery" @input="onSearch"
+            class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-64 pl-10 p-2 shadow-sm transition-colors"
+            placeholder="Search users..." />
+        </div>
+        <CreateButton to="/users/new" icon="heroicons:user-plus">
+          Add User
+        </CreateButton>
+      </div>
     </div>
 
     <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mt-6">
@@ -62,11 +72,17 @@ const page = ref(1)
 const perPage = ref(10)
 const lastPage = ref(1)
 const total = ref(0)
+const searchQuery = ref('')
 
 const isDeleteModalOpen = ref(false)
 const itemToDelete = ref<number | null>(null)
 
 onMounted(() => loadUsers())
+
+function onSearch() {
+  page.value = 1
+  loadUsers()
+}
 
 function onPerPageChange(val: number) {
   perPage.value = val
@@ -76,7 +92,7 @@ function onPerPageChange(val: number) {
 
 async function loadUsers(p?: number) {
   if (p) page.value = p
-  const { data } = await get<{ users: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/users?page=${page.value}&perPage=${perPage.value}`)
+  const { data } = await get<{ users: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/users?page=${page.value}&perPage=${perPage.value}&search=${encodeURIComponent(searchQuery.value)}`)
   if (data?.users) users.value = data.users
   if (data?.pagination) {
     lastPage.value = data.pagination.lastPage

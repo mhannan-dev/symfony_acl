@@ -25,8 +25,15 @@ class GroupController extends AbstractController
     {
         $page = max(1, $request->query->getInt('page', 1));
         $perPage = min(100, max(1, $request->query->getInt('perPage', 10)));
+        $search = $request->query->getString('search', '');
 
         $qb = $repo->createQueryBuilder('g');
+
+        if ($search) {
+            $qb->where('g.name LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
         $total = (clone $qb)->select('COUNT(g.id)')->getQuery()->getSingleScalarResult();
         $groups = $qb->select('g')
             ->setFirstResult(($page - 1) * $perPage)

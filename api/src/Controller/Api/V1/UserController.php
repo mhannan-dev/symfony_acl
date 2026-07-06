@@ -27,8 +27,15 @@ class UserController extends AbstractController
     {
         $page = max(1, $request->query->getInt('page', 1));
         $perPage = min(100, max(1, $request->query->getInt('perPage', 10)));
+        $search = $request->query->getString('search', '');
 
         $qb = $repo->createQueryBuilder('u');
+
+        if ($search) {
+            $qb->where('u.name LIKE :search OR u.email LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
         $total = (clone $qb)->select('COUNT(u.id)')->getQuery()->getSingleScalarResult();
         $users = $qb->select('u')
             ->setFirstResult(($page - 1) * $perPage)

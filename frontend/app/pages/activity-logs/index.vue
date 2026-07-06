@@ -1,6 +1,16 @@
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold text-slate-900">Activity Logs</h1>
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-slate-900">Activity Logs</h1>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <Icon name="heroicons:magnifying-glass" class="w-5 h-5 text-gray-500" />
+        </div>
+        <input type="text" v-model="searchQuery" @input="onSearch"
+          class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-64 pl-10 p-2 shadow-sm transition-colors"
+          placeholder="Search activity logs..." />
+      </div>
+    </div>
 
     <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
       <table class="w-full">
@@ -47,8 +57,14 @@ const page = ref(1)
 const perPage = ref(10)
 const lastPage = ref(1)
 const total = ref(0)
+const searchQuery = ref('')
 
 onMounted(() => loadLogs())
+
+function onSearch() {
+  page.value = 1
+  loadLogs()
+}
 
 function onPerPageChange(val: number) {
   perPage.value = val
@@ -58,7 +74,7 @@ function onPerPageChange(val: number) {
 
 async function loadLogs(p?: number) {
   if (p) page.value = p
-  const { data } = await get<{ logs: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/activity-logs?page=${page.value}&perPage=${perPage.value}`)
+  const { data } = await get<{ logs: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/activity-logs?page=${page.value}&perPage=${perPage.value}&search=${encodeURIComponent(searchQuery.value)}`)
   if (data?.logs) logs.value = data.logs
   if (data?.pagination) {
     lastPage.value = data.pagination.lastPage

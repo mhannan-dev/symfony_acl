@@ -17,8 +17,17 @@ class ActivityLogController extends AbstractController
     {
         $page = max(1, $request->query->getInt('page', 1));
         $perPage = min(100, max(1, $request->query->getInt('perPage', 10)));
+        $search = $request->query->getString('search', '');
 
-        $qb = $repo->createQueryBuilder('l');
+        $qb = $repo->createQueryBuilder('l')
+            ->leftJoin('l.user', 'u')
+            ->leftJoin('l.contentType', 'ct');
+
+        if ($search) {
+            $qb->where('l.objectRepr LIKE :search OR l.changeMessage LIKE :search OR u.name LIKE :search OR ct.appLabel LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
         $total = (clone $qb)->select('COUNT(l.id)')->getQuery()->getSingleScalarResult();
         $logs = $qb->select('l')
             ->orderBy('l.actionTime', 'DESC')

@@ -24,8 +24,16 @@ class PermissionController extends AbstractController
     {
         $page = max(1, $request->query->getInt('page', 1));
         $perPage = min(100, max(1, $request->query->getInt('perPage', 10)));
+        $search = $request->query->getString('search', '');
 
-        $qb = $repo->createQueryBuilder('p');
+        $qb = $repo->createQueryBuilder('p')
+            ->leftJoin('p.contentType', 'ct');
+
+        if ($search) {
+            $qb->where('p.name LIKE :search OR p.codename LIKE :search OR ct.appLabel LIKE :search OR ct.model LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
         $total = (clone $qb)->select('COUNT(p.id)')->getQuery()->getSingleScalarResult();
         $permissions = $qb->select('p')
             ->setFirstResult(($page - 1) * $perPage)

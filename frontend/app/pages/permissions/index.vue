@@ -8,11 +8,11 @@
           <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Icon name="heroicons:magnifying-glass" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </div>
-          <input 
-            type="text" 
-            v-model="searchQuery" 
-            class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 shadow-sm transition-colors" 
-            placeholder="Search permissions..." 
+          <input
+            type="text"
+            v-model="searchQuery" @input="onSearch"
+            class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 shadow-sm transition-colors"
+            placeholder="Search permissions..."
           />
         </div>
         <CreateButton to="/permissions/new" icon="heroicons:key" class="whitespace-nowrap">
@@ -32,7 +32,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <tr v-for="perm in filteredPermissions" :key="perm.id" class="hover:bg-slate-50">
+          <tr v-for="perm in permissions" :key="perm.id" class="hover:bg-slate-50">
             <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ perm.name }}</td>
             <td class="px-6 py-4 text-sm text-slate-500"><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">{{ perm.codename }}</code></td>
             <td class="px-6 py-4 text-sm text-slate-500">{{ perm.contentType ? `${perm.contentType.appLabel} &mdash; ${perm.contentType.model}` : '&mdash;' }}</td>
@@ -41,7 +41,7 @@
               <ActionIconButton @click="confirmDelete(perm.id)" icon="heroicons:trash" title="Delete" color="red" />
             </td>
           </tr>
-          <tr v-if="!filteredPermissions.length">
+          <tr v-if="!permissions.length">
             <td colspan="4" class="px-6 py-12 text-center text-sm text-slate-500">
               <div v-if="searchQuery" class="flex flex-col items-center justify-center">
                 <Icon name="heroicons:magnifying-glass" class="w-8 h-8 text-slate-300 mb-2" />
@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 definePageMeta({
   layout: 'admin',
@@ -79,24 +79,15 @@ const lastPage = ref(1)
 const total = ref(0)
 const searchQuery = ref('')
 
-const filteredPermissions = computed(() => {
-  if (!searchQuery.value) return permissions.value
-  
-  const query = searchQuery.value.toLowerCase()
-  return permissions.value.filter(p => {
-    return (
-      (p.name && p.name.toLowerCase().includes(query)) ||
-      (p.codename && p.codename.toLowerCase().includes(query)) ||
-      (p.contentType && p.contentType.model && p.contentType.model.toLowerCase().includes(query)) ||
-      (p.contentType && p.contentType.appLabel && p.contentType.appLabel.toLowerCase().includes(query))
-    )
-  })
-})
-
 const isDeleteModalOpen = ref(false)
 const itemToDelete = ref<number | null>(null)
 
 onMounted(() => loadPermissions())
+
+function onSearch() {
+  page.value = 1
+  loadPermissions()
+}
 
 function onPerPageChange(val: number) {
   perPage.value = val
@@ -106,7 +97,7 @@ function onPerPageChange(val: number) {
 
 async function loadPermissions(p?: number) {
   if (p) page.value = p
-  const { data } = await get<{ permissions: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/permissions?page=${page.value}&perPage=${perPage.value}`)
+  const { data } = await get<{ permissions: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/permissions?page=${page.value}&perPage=${perPage.value}&search=${encodeURIComponent(searchQuery.value)}`)
   if (data?.permissions) permissions.value = data.permissions
   if (data?.pagination) {
     lastPage.value = data.pagination.lastPage
