@@ -58,8 +58,9 @@
     <aside :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed top-0 left-0 z-40 w-64 h-screen pt-16 transition-transform bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidenav">
       <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800 flex flex-col justify-between">
         <ul class="space-y-2">
-          <li v-for="item in navItems" :key="item.href">
-            <NuxtLink
+          <template v-for="item in navItems" :key="item.href">
+            <li v-if="!item.permission || hasPermission(item.permission)">
+              <NuxtLink
               :to="item.href"
               class="flex items-center p-2 text-base font-medium rounded-lg transition-colors group"
               :class="isActive(item.href) ? 'bg-primary-50 text-primary-700 dark:bg-gray-700 dark:text-white' : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'"
@@ -70,8 +71,9 @@
                 :class="isActive(item.href) ? 'text-primary-700 dark:text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'" 
               />
               <span class="ml-3">{{ item.label }}</span>
-            </NuxtLink>
-          </li>
+              </NuxtLink>
+            </li>
+          </template>
         </ul>
       </div>
     </aside>
@@ -92,9 +94,11 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuth } from '../../layers/features/auth/composables/useAuth'
+import { useAcl } from '../composables/useAcl'
 
 const route = useRoute()
 const { user, logout } = useAuth()
+const { hasPermission } = useAcl()
 
 const isSidebarOpen = ref(false)
 const isUserMenuOpen = ref(false)
@@ -102,11 +106,11 @@ const isUserMenuOpen = ref(false)
 // Used exclusively @nuxt/icon components instead of raw SVGs
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: 'heroicons:home' },
-  { label: 'Users', href: '/users', icon: 'heroicons:users' },
-  { label: 'Groups', href: '/groups', icon: 'heroicons:user-group' },
-  { label: 'Permissions', href: '/permissions', icon: 'heroicons:key' },
-  { label: 'Content Types', href: '/content-types', icon: 'heroicons:document-text' },
-  { label: 'Activity Logs', href: '/activity-logs', icon: 'heroicons:clock' },
+  { label: 'Users', href: '/users', icon: 'heroicons:users', permission: 'view_user' },
+  { label: 'Groups', href: '/groups', icon: 'heroicons:user-group', permission: 'view_group' },
+  { label: 'Permissions', href: '/permissions', icon: 'heroicons:key', permission: 'view_permission' },
+  { label: 'Content Types', href: '/content-types', icon: 'heroicons:document-text', permission: 'view_content_type' },
+  { label: 'Activity Logs', href: '/activity-logs', icon: 'heroicons:clock', permission: 'view_activity_log' },
 ]
 
 function isActive(href: string): boolean {

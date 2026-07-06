@@ -48,7 +48,8 @@ import { ref, onMounted } from 'vue'
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth',
+  middleware: ['auth', 'acl'],
+  permission: 'view_activity_log',
 })
 
 const { get } = useApi()

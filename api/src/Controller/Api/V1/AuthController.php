@@ -12,6 +12,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Service\PermissionCheckService;
 use App\Controller\Api\ApiResponseTrait;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -25,7 +26,8 @@ class AuthController extends AbstractController
         LoginRequest $request,
         UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
-        Security $security
+        Security $security,
+        PermissionCheckService $permissionCheckService
     ): JsonResponse {
         $user = $userRepository->findOneBy(['email' => $request->email]);
 
@@ -35,12 +37,18 @@ class AuthController extends AbstractController
 
         $security->login($user, 'security.authenticator.form_login.main');
 
+        $permissions = array_values(array_filter(array_map(
+            fn($p) => $p['codename'] ?? null,
+            $permissionCheckService->getUserPermissions($user)
+        )));
+
         return $this->apiSuccess([
             'user' => [
                 'id' => $user->getId(),
                 'name' => $user->getName(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
+                'permissions' => $permissions,
             ],
         ]);
     }
@@ -52,7 +60,7 @@ class AuthController extends AbstractController
     }
 
     #[Route('/me', name: 'api_v1_me', methods: ['GET'])]
-    public function me(): JsonResponse
+    public function me(PermissionCheckService $permissionCheckService): JsonResponse
     {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -61,12 +69,18 @@ class AuthController extends AbstractController
             return $this->apiError('Not authenticated.', Response::HTTP_UNAUTHORIZED);
         }
 
+        $permissions = array_values(array_filter(array_map(
+            fn($p) => $p['codename'] ?? null,
+            $permissionCheckService->getUserPermissions($user)
+        )));
+
         return $this->apiSuccess([
             'user' => [
                 'id' => $user->getId(),
                 'name' => $user->getName(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
+                'permissions' => $permissions,
             ],
         ]);
     }

@@ -63,7 +63,8 @@ import { ref, onMounted } from 'vue'
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth',
+  middleware: ['auth', 'acl'],
+  permission: 'view_user',
 })
 
 const { get, del } = useApi()
@@ -107,10 +108,17 @@ function confirmDelete(id: number) {
 
 async function executeDelete() {
   if (itemToDelete.value) {
-    await del(`/users/${itemToDelete.value}/delete`)
+    const { error } = await del(`/users/${itemToDelete.value}/delete`)
+    if (error) {
+      useToast().error(error)
+      isDeleteModalOpen.value = false
+      itemToDelete.value = null
+      return
+    }
     users.value = users.value.filter(u => u.id !== itemToDelete.value)
     isDeleteModalOpen.value = false
     itemToDelete.value = null
+    useToast().success('User deleted successfully')
   }
 }
 </script>

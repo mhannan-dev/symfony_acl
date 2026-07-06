@@ -46,7 +46,8 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth',
+  middleware: ['auth', 'acl'],
+  permission: 'add_permission',
 })
 
 const router = useRouter()
@@ -68,13 +69,18 @@ onMounted(async () => {
 
 async function submit() {
   saving.value = true
-  await post('/permissions/save', {
+  const { error } = await post('/permissions/save', {
     id: null,
     name: form.name,
     codename: form.codename,
     contentTypeId: form.contentTypeId ? parseInt(form.contentTypeId) : null,
   })
   saving.value = false
+  if (error) {
+    useToast().error(error)
+    return
+  }
+  useToast().success('Permission created successfully')
   router.push('/permissions')
 }
 </script>

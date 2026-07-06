@@ -54,7 +54,8 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth',
+  middleware: ['auth', 'acl'],
+  permission: 'add_user',
 })
 
 const router = useRouter()
@@ -77,7 +78,7 @@ onMounted(async () => {
 
 async function submit() {
   saving.value = true
-  await post('/users/save', {
+  const { error } = await post('/users/save', {
     id: null,
     name: form.name,
     email: form.email,
@@ -85,6 +86,11 @@ async function submit() {
     groupIds: form.groupIds,
   })
   saving.value = false
+  if (error) {
+    useToast().error(error)
+    return
+  }
+  useToast().success('User created successfully')
   router.push('/users')
 }
 </script>

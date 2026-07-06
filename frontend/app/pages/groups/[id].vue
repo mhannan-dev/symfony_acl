@@ -55,7 +55,8 @@ import { ref, computed, reactive, onMounted } from 'vue'
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth',
+  middleware: ['auth', 'acl'],
+  permission: 'change_group',
 })
 
 const route = useRoute()
@@ -98,12 +99,17 @@ onMounted(async () => {
 
 async function submit() {
   saving.value = true
-  await post('/groups/save', {
+  const { error } = await post('/groups/save', {
     id: form.id,
     name: form.name,
     permissionIds: form.permissionIds,
   })
   saving.value = false
+  if (error) {
+    useToast().error(error)
+    return
+  }
+  useToast().success('Group saved successfully')
   router.push('/groups')
 }
 </script>

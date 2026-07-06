@@ -7,11 +7,13 @@ use App\Repository\ContentTypeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/v1/content-types')]
 class ContentTypeController extends AbstractController
 {
     #[Route('', name: 'api_content_types_list', methods: ['GET'])]
+    #[IsGranted('view', 'content_type')]
     public function index(ContentTypeRepository $repo): JsonResponse
     {
         $items = $repo->findAll();

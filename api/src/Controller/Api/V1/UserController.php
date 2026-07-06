@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/v1/users')]
 class UserController extends AbstractController
@@ -23,6 +24,7 @@ class UserController extends AbstractController
     }
 
     #[Route('', name: 'api_v1_users_list', methods: ['GET'])]
+    #[IsGranted('view', 'user')]
     public function index(Request $request, UserRepository $repo): JsonResponse
     {
         $page = max(1, $request->query->getInt('page', 1));
@@ -65,6 +67,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/new', name: 'api_v1_users_new_form', methods: ['GET'])]
+    #[IsGranted('create', 'user')]
     public function new(GroupRepository $groupRepo): JsonResponse
     {
         $groups = $groupRepo->findAll();
@@ -77,6 +80,7 @@ class UserController extends AbstractController
     public function save(Request $request, GroupRepository $groupRepo): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+        $this->denyAccessUnlessGranted(empty($data['id']) ? 'create' : 'edit', 'user');
 
         $user = $data['id'] ? $this->em->getRepository(User::class)->find($data['id']) : new User();
         $user->setName($data['name']);
@@ -90,6 +94,8 @@ class UserController extends AbstractController
             $this->em->remove($ug);
         }
         $user->getUserGroups()->clear();
+        $this->em->flush(); // Flush the DELETEs first to avoid unique constraint violations
+
 
         $selectedGroupIds = $data['groupIds'] ?? [];
         foreach ($selectedGroupIds as $groupId) {
@@ -110,6 +116,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'api_v1_users_edit_form', methods: ['GET'])]
+    #[IsGranted('edit', 'user')]
     public function edit(User $user, GroupRepository $groupRepo): JsonResponse
     {
         $groups = $groupRepo->findAll();
@@ -127,6 +134,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'api_v1_users_delete', methods: ['DELETE'])]
+    #[IsGranted('delete', 'user')]
     public function delete(User $user): JsonResponse
     {
         $this->em->remove($user);

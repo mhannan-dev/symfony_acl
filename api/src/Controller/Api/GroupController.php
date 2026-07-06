@@ -10,7 +10,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/v1/groups')]
 class GroupController extends AbstractController
@@ -21,6 +23,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('', name: 'api_groups_list', methods: ['GET'])]
+    #[IsGranted('view', 'group')]
     public function index(Request $request, GroupRepository $repo): JsonResponse
     {
         $page = max(1, $request->query->getInt('page', 1));
@@ -62,6 +65,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('/new', name: 'api_groups_new_form', methods: ['GET'])]
+    #[IsGranted('create', 'group')]
     public function new(PermissionRepository $permRepo): JsonResponse
     {
         $permissions = array_map(fn($p) => ['id' => $p->getId(), 'name' => $p->getName(), 'codename' => $p->getCodename()], $permRepo->findAll());
@@ -73,6 +77,11 @@ class GroupController extends AbstractController
     public function save(Request $request, PermissionRepository $permRepo): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+        $this->denyAccessUnlessGranted(empty($data['id']) ? 'create' : 'edit', 'group');
+
+        if (empty($data['name'])) {
+            return $this->json(['error' => 'Group name is required'], Response::HTTP_BAD_REQUEST);
+        }
 
         $group = $data['id'] ? $this->em->getRepository(Group::class)->find($data['id']) : new Group();
         $group->setName($data['name']);
@@ -81,6 +90,8 @@ class GroupController extends AbstractController
             $this->em->remove($gp);
         }
         $group->getGroupPermissions()->clear();
+        $this->em->flush(); // Flush the DELETEs first to avoid unique constraint violations
+
 
         $selectedPermIds = $data['permissionIds'] ?? [];
         foreach ($selectedPermIds as $permId) {
@@ -101,6 +112,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'api_groups_edit_form', methods: ['GET'])]
+    #[IsGranted('edit', 'group')]
     public function edit(Group $group, PermissionRepository $permRepo): JsonResponse
     {
         $permissions = array_map(fn($p) => ['id' => $p->getId(), 'name' => $p->getName(), 'codename' => $p->getCodename()], $permRepo->findAll());
@@ -114,6 +126,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'api_groups_delete', methods: ['DELETE'])]
+    #[IsGranted('delete', 'group')]
     public function delete(Group $group): JsonResponse
     {
         $this->em->remove($group);
