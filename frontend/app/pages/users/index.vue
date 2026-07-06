@@ -37,6 +37,7 @@
           </tr>
         </tbody>
       </table>
+      <Pagination :current-page="page" :last-page="lastPage" :total="total" @page="loadUsers" />
     </div>
 
     <ConfirmModal 
@@ -57,14 +58,24 @@ definePageMeta({
 
 const { get, del } = useApi()
 const users = ref<any[]>([])
+const page = ref(1)
+const lastPage = ref(1)
+const total = ref(0)
 
 const isDeleteModalOpen = ref(false)
 const itemToDelete = ref<number | null>(null)
 
-onMounted(async () => {
-  const { data } = await get<{ users: any[] }>('/users')
+onMounted(() => loadUsers())
+
+async function loadUsers(p?: number) {
+  if (p) page.value = p
+  const { data } = await get<{ users: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/users?page=${page.value}&perPage=10`)
   if (data?.users) users.value = data.users
-})
+  if (data?.pagination) {
+    lastPage.value = data.pagination.lastPage
+    total.value = data.pagination.total
+  }
+}
 
 function confirmDelete(id: number) {
   itemToDelete.value = id

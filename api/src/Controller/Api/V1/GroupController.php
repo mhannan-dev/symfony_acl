@@ -21,9 +21,19 @@ class GroupController extends AbstractController
     }
 
     #[Route('', name: 'api_v1_groups_list', methods: ['GET'])]
-    public function index(GroupRepository $repo): JsonResponse
+    public function index(Request $request, GroupRepository $repo): JsonResponse
     {
-        $groups = $repo->findAll();
+        $page = max(1, $request->query->getInt('page', 1));
+        $perPage = min(100, max(1, $request->query->getInt('perPage', 10)));
+
+        $qb = $repo->createQueryBuilder('g');
+        $total = (clone $qb)->select('COUNT(g.id)')->getQuery()->getSingleScalarResult();
+        $groups = $qb->select('g')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage)
+            ->getQuery()
+            ->getResult();
+
         $data = array_map(fn(Group $group) => [
             'id' => $group->getId(),
             'name' => $group->getName(),
@@ -33,7 +43,15 @@ class GroupController extends AbstractController
             ),
         ], $groups);
 
-        return $this->json(['groups' => $data]);
+        return $this->json([
+            'groups' => $data,
+            'pagination' => [
+                'currentPage' => $page,
+                'perPage' => $perPage,
+                'total' => (int) $total,
+                'lastPage' => (int) ceil($total / $perPage),
+            ],
+        ]);
     }
 
     #[Route('/new', name: 'api_v1_groups_new_form', methods: ['GET'])]

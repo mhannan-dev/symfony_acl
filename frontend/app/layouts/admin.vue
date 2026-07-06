@@ -83,6 +83,8 @@
     
     <!-- Mobile Sidebar Backdrop -->
     <div v-if="isSidebarOpen" @click="isSidebarOpen = false" class="bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-30 md:hidden"></div>
+
+    <ToastContainer />
   </div>
 </template>
 

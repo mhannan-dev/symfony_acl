@@ -24,9 +24,19 @@ class UserController extends AbstractController
     }
 
     #[Route('', name: 'api_users_list', methods: ['GET'])]
-    public function index(UserRepository $repo): JsonResponse
+    public function index(Request $request, UserRepository $repo): JsonResponse
     {
-        $users = $repo->findAll();
+        $page = max(1, $request->query->getInt('page', 1));
+        $perPage = min(100, max(1, $request->query->getInt('perPage', 10)));
+
+        $qb = $repo->createQueryBuilder('u');
+        $total = (clone $qb)->select('COUNT(u.id)')->getQuery()->getSingleScalarResult();
+        $users = $qb->select('u')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage)
+            ->getQuery()
+            ->getResult();
+
         $data = array_map(fn(User $user) => [
             'id' => $user->getId(),
             'name' => $user->getName(),
@@ -37,7 +47,15 @@ class UserController extends AbstractController
             ),
         ], $users);
 
-        return $this->json(['users' => $data]);
+        return $this->json([
+            'users' => $data,
+            'pagination' => [
+                'currentPage' => $page,
+                'perPage' => $perPage,
+                'total' => (int) $total,
+                'lastPage' => (int) ceil($total / $perPage),
+            ],
+        ]);
     }
 
     #[Route('/new', name: 'api_users_new_form', methods: ['GET'])]

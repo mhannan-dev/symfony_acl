@@ -28,11 +28,14 @@
           </tr>
         </tbody>
       </table>
+      <Pagination :current-page="page" :last-page="lastPage" :total="total" @page="loadLogs" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
 definePageMeta({
   layout: 'admin',
   middleware: 'auth',
@@ -40,11 +43,21 @@ definePageMeta({
 
 const { get } = useApi()
 const logs = ref<any[]>([])
+const page = ref(1)
+const lastPage = ref(1)
+const total = ref(0)
 
-onMounted(async () => {
-  const { data } = await get<{ logs: any[] }>('/activity-logs')
+onMounted(() => loadLogs())
+
+async function loadLogs(p?: number) {
+  if (p) page.value = p
+  const { data } = await get<{ logs: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/activity-logs?page=${page.value}&perPage=10`)
   if (data?.logs) logs.value = data.logs
-})
+  if (data?.pagination) {
+    lastPage.value = data.pagination.lastPage
+    total.value = data.pagination.total
+  }
+}
 
 function actionLabel(flag: number) {
   const labels = { 1: 'Addition', 2: 'Change', 3: 'Deletion' }

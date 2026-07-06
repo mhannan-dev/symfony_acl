@@ -20,9 +20,19 @@ class PermissionController extends AbstractController
     }
 
     #[Route('', name: 'api_v1_permissions_list', methods: ['GET'])]
-    public function index(PermissionRepository $repo): JsonResponse
+    public function index(Request $request, PermissionRepository $repo): JsonResponse
     {
-        $permissions = $repo->findAll();
+        $page = max(1, $request->query->getInt('page', 1));
+        $perPage = min(100, max(1, $request->query->getInt('perPage', 10)));
+
+        $qb = $repo->createQueryBuilder('p');
+        $total = (clone $qb)->select('COUNT(p.id)')->getQuery()->getSingleScalarResult();
+        $permissions = $qb->select('p')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage)
+            ->getQuery()
+            ->getResult();
+
         $data = array_map(fn(Permission $perm) => [
             'id' => $perm->getId(),
             'name' => $perm->getName(),
@@ -34,7 +44,15 @@ class PermissionController extends AbstractController
             ] : null,
         ], $permissions);
 
-        return $this->json(['permissions' => $data]);
+        return $this->json([
+            'permissions' => $data,
+            'pagination' => [
+                'currentPage' => $page,
+                'perPage' => $perPage,
+                'total' => (int) $total,
+                'lastPage' => (int) ceil($total / $perPage),
+            ],
+        ]);
     }
 
     #[Route('/new', name: 'api_v1_permissions_new_form', methods: ['GET'])]

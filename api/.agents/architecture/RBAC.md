@@ -1,12 +1,6 @@
+# ACL / RBAC Architecture
 
-
-
-
-
-
-# ACL Mechanism Analysis
-
-Based on the Laravel migrations, this is a **Django-style RBAC (Role-Based Access Control) system** adapted for Laravel. Here's the breakdown:
+This document describes the Django-style Role-Based Access Control (RBAC) system implemented in this Symfony application.
 
 ## Core Tables
 
@@ -22,11 +16,12 @@ Based on the Laravel migrations, this is a **Django-style RBAC (Role-Based Acces
 - Unique constraint: `content_type_id` + `codename`
 
 **3. `content_types`**
-- Django's content type framework
+- Django-style content type framework
 - Fields: `id`, `app_label`, `model`
 - Enables permissions like "add_user", "change_post", "delete_comment"
+- Auto-populated via `app:sync-permissions` console command
 
-## Relationship Tables
+## Pivot Tables
 
 **4. `group_permissions`**
 - Many-to-many: Groups ↔ Permissions
@@ -59,3 +54,21 @@ Based on the Laravel migrations, this is a **Django-style RBAC (Role-Based Acces
 5. All actions logged in **Activity Logs**
 
 This provides hierarchical permission management with both role-based and user-specific permissions, plus comprehensive audit logging.
+
+## Key Console Commands
+
+```bash
+# Auto-detect Doctrine entities and create content types + default permissions
+php bin/console app:sync-permissions
+
+# Load sample data from fixtures
+php bin/console doctrine:fixtures:load
+```
+
+## Permission Resolution Order
+
+When checking if a user has a permission:
+
+1. Check `user_permissions` (direct assignment — highest priority)
+2. Check `user_groups` → `group_permissions` (role-based — lower priority)
+3. Super-admin users (all members of "Admin" group) implicitly have all permissions
