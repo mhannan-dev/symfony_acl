@@ -18,7 +18,6 @@
             <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ ct.appLabel }}</td>
             <td class="px-6 py-4 text-sm text-slate-500"><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">{{ ct.model }}</code></td>
             <td class="px-6 py-4 text-sm text-slate-500">{{ ct.permissions ? ct.permissions.length : 0 }}</td>
-            <td class="px-6 py-4 text-right"></td>
           </tr>
           <tr v-if="!contentTypes.length">
             <td colspan="4" class="px-6 py-12 text-center text-sm text-slate-400">No content types found.</td>
@@ -26,13 +25,14 @@
         </tbody>
       </table>
     </div>
-
-    
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useAcl } from '../../composables/useAcl'
+
+const { hasPermission } = useAcl()
 
 definePageMeta({
   layout: 'admin',

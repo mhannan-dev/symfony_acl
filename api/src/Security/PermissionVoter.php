@@ -28,15 +28,15 @@ class PermissionVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        if (!isset(self::ACTIONS[$attribute])) {
-            return false;
+        if (isset(self::ACTIONS[$attribute]) && is_string($subject)) {
+            return true;
         }
 
-        if ($subject !== null && !is_string($subject)) {
-            return false;
+        if (preg_match('/^(view|add|change|delete)_[a-z_]+$/', $attribute)) {
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -47,7 +47,11 @@ class PermissionVoter extends Voter
             return false;
         }
 
-        $codename = sprintf(self::ACTIONS[$attribute], $subject);
+        if (isset(self::ACTIONS[$attribute]) && is_string($subject)) {
+            $codename = sprintf(self::ACTIONS[$attribute], $subject);
+        } else {
+            $codename = $attribute;
+        }
 
         return $this->permissionCheck->hasPermission($user, $codename);
     }

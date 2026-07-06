@@ -23,7 +23,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('', name: 'api_v1_groups_list', methods: ['GET'])]
-    #[IsGranted('view', 'group')]
+    #[IsGranted('view_group')]
     public function index(Request $request, GroupRepository $repo): JsonResponse
     {
         $page = max(1, $request->query->getInt('page', 1));
@@ -65,7 +65,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('/new', name: 'api_v1_groups_new_form', methods: ['GET'])]
-    #[IsGranted('create', 'group')]
+    #[IsGranted('add_group')]
     public function new(PermissionRepository $permRepo): JsonResponse
     {
         $permissions = array_map(fn($p) => ['id' => $p->getId(), 'name' => $p->getName(), 'codename' => $p->getCodename()], $permRepo->findAll());
@@ -112,7 +112,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'api_v1_groups_edit_form', methods: ['GET'])]
-    #[IsGranted('edit', 'group')]
+    #[IsGranted('change_group')]
     public function edit(Group $group, PermissionRepository $permRepo): JsonResponse
     {
         $permissions = array_map(fn($p) => ['id' => $p->getId(), 'name' => $p->getName(), 'codename' => $p->getCodename()], $permRepo->findAll());
@@ -126,7 +126,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'api_v1_groups_delete', methods: ['DELETE'])]
-    #[IsGranted('delete', 'group')]
+    #[IsGranted('delete_group')]
     public function delete(Group $group): JsonResponse
     {
         $this->em->remove($group);

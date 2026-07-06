@@ -14,7 +14,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ActivityLogController extends AbstractController
 {
     #[Route('', name: 'api_v1_activity_logs_list', methods: ['GET'])]
-    #[IsGranted('view', 'activity_log')]
+    #[IsGranted('view_activity_log')]
     public function index(Request $request, ActivityLogRepository $repo): JsonResponse
     {
         $page = max(1, $request->query->getInt('page', 1));

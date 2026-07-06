@@ -15,7 +15,7 @@
             placeholder="Search permissions..."
           />
         </div>
-        <CreateButton to="/permissions/new" icon="heroicons:key" class="whitespace-nowrap">
+        <CreateButton v-if="hasPermission('add_permission')" to="/permissions/new" icon="heroicons:key" class="whitespace-nowrap">
           Add Permission
         </CreateButton>
       </div>
@@ -37,8 +37,8 @@
             <td class="px-6 py-4 text-sm text-slate-500"><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">{{ perm.codename }}</code></td>
             <td class="px-6 py-4 text-sm text-slate-500">{{ perm.contentType ? `${perm.contentType.appLabel} &mdash; ${perm.contentType.model}` : '&mdash;' }}</td>
             <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
-              <ActionIconButton :to="`/permissions/${perm.id}`" icon="heroicons:pencil-square" title="Edit" color="blue" />
-              <ActionIconButton @click="confirmDelete(perm.id)" icon="heroicons:trash" title="Delete" color="red" />
+              <ActionIconButton v-if="hasPermission('change_permission')" :to="`/permissions/${perm.id}`" icon="heroicons:pencil-square" title="Edit" color="blue" />
+              <ActionIconButton v-if="hasPermission('delete_permission')" @click="confirmDelete(perm.id)" icon="heroicons:trash" title="Delete" color="red" />
             </td>
           </tr>
           <tr v-if="!permissions.length">
@@ -65,6 +65,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useAcl } from '../../composables/useAcl'
+
+const { hasPermission } = useAcl()
 
 definePageMeta({
   layout: 'admin',

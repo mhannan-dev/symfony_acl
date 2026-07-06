@@ -21,7 +21,7 @@ class PermissionController extends AbstractController
     }
 
     #[Route('', name: 'api_v1_permissions_list', methods: ['GET'])]
-    #[IsGranted('view', 'permission')]
+    #[IsGranted('view_permission')]
     public function index(Request $request, PermissionRepository $repo): JsonResponse
     {
         $page = max(1, $request->query->getInt('page', 1));
@@ -66,7 +66,7 @@ class PermissionController extends AbstractController
     }
 
     #[Route('/new', name: 'api_v1_permissions_new_form', methods: ['GET'])]
-    #[IsGranted('create', 'permission')]
+    #[IsGranted('add_permission')]
     public function new(ContentTypeRepository $ctRepo): JsonResponse
     {
         $contentTypes = array_map(fn($ct) => ['id' => $ct->getId(), 'appLabel' => $ct->getAppLabel(), 'model' => $ct->getModel()], $ctRepo->findAll());
@@ -96,7 +96,7 @@ class PermissionController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'api_v1_permissions_edit_form', methods: ['GET'])]
-    #[IsGranted('edit', 'permission')]
+    #[IsGranted('change_permission')]
     public function edit(Permission $permission, ContentTypeRepository $ctRepo): JsonResponse
     {
         $contentTypes = array_map(fn($ct) => ['id' => $ct->getId(), 'appLabel' => $ct->getAppLabel(), 'model' => $ct->getModel()], $ctRepo->findAll());
@@ -113,7 +113,7 @@ class PermissionController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'api_v1_permissions_delete', methods: ['DELETE'])]
-    #[IsGranted('delete', 'permission')]
+    #[IsGranted('delete_permission')]
     public function delete(Permission $permission): JsonResponse
     {
         $this->em->remove($permission);

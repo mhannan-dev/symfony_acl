@@ -11,7 +11,7 @@
             class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-64 pl-10 p-2 shadow-sm transition-colors"
             placeholder="Search users..." />
         </div>
-        <CreateButton to="/users/new" icon="heroicons:user-plus">
+        <CreateButton v-if="hasPermission('add_user')" to="/users/new" icon="heroicons:user-plus">
           Add User
         </CreateButton>
       </div>
@@ -38,8 +38,8 @@
               <span v-if="!user.userGroups.length" class="text-slate-400">&mdash;</span>
             </td>
             <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
-              <ActionIconButton :to="`/users/${user.id}`" icon="heroicons:pencil-square" title="Edit" color="blue" />
-              <ActionIconButton @click="confirmDelete(user.id)" icon="heroicons:trash" title="Delete" color="red" />
+              <ActionIconButton v-if="hasPermission('change_user')" :to="`/users/${user.id}`" icon="heroicons:pencil-square" title="Edit" color="blue" />
+              <ActionIconButton v-if="hasPermission('delete_user')" @click="confirmDelete(user.id)" icon="heroicons:trash" title="Delete" color="red" />
             </td>
           </tr>
           <tr v-if="!users.length">
@@ -60,6 +60,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useAcl } from '../../composables/useAcl'
+
+const { hasPermission } = useAcl()
 
 definePageMeta({
   layout: 'admin',

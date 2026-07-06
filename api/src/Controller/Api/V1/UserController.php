@@ -24,7 +24,7 @@ class UserController extends AbstractController
     }
 
     #[Route('', name: 'api_v1_users_list', methods: ['GET'])]
-    #[IsGranted('view', 'user')]
+    #[IsGranted('view_user')]
     public function index(Request $request, UserRepository $repo): JsonResponse
     {
         $page = max(1, $request->query->getInt('page', 1));
@@ -67,7 +67,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/new', name: 'api_v1_users_new_form', methods: ['GET'])]
-    #[IsGranted('create', 'user')]
+    #[IsGranted('add_user')]
     public function new(GroupRepository $groupRepo): JsonResponse
     {
         $groups = $groupRepo->findAll();
@@ -116,7 +116,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'api_v1_users_edit_form', methods: ['GET'])]
-    #[IsGranted('edit', 'user')]
+    #[IsGranted('change_user')]
     public function edit(User $user, GroupRepository $groupRepo): JsonResponse
     {
         $groups = $groupRepo->findAll();
@@ -134,7 +134,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'api_v1_users_delete', methods: ['DELETE'])]
-    #[IsGranted('delete', 'user')]
+    #[IsGranted('delete_user')]
     public function delete(User $user): JsonResponse
     {
         $this->em->remove($user);

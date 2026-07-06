@@ -13,7 +13,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ContentTypeController extends AbstractController
 {
     #[Route('', name: 'api_v1_content_types_list', methods: ['GET'])]
-    #[IsGranted('view', 'content_type')]
+    #[IsGranted('view_content_type')]
     public function index(ContentTypeRepository $repo): JsonResponse
     {
         $items = $repo->findAll();
