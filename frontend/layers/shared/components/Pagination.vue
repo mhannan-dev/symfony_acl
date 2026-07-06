@@ -1,11 +1,21 @@
 <template>
-  <div v-if="lastPage > 1" class="flex items-center justify-between px-6 py-3 border-t border-slate-200">
-    <p class="text-sm text-slate-500">
-      Showing page {{ currentPage }} of {{ lastPage }}
-      <span class="font-medium">({{ total }} total)</span>
-    </p>
+  <div class="flex items-center justify-between px-6 py-3 border-t border-slate-200">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 text-sm text-slate-500">
+        <span>Rows per page:</span>
+        <select :value="perPage" @change="$emit('update:perPage', Number(($event.target as HTMLSelectElement).value))"
+          class="border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-700 bg-white focus:ring-primary-500 focus:border-primary-500">
+          <option v-for="opt in perPageOptions" :key="opt" :value="opt">{{ opt }}</option>
+        </select>
+      </div>
 
-    <div class="flex items-center gap-1">
+      <p class="text-sm text-slate-500">
+        <span class="font-medium">{{ from }}-{{ to }}</span>
+        of <span class="font-medium">{{ total }}</span>
+      </p>
+    </div>
+
+    <div v-if="lastPage > 1" class="flex items-center gap-1">
       <button @click="go(currentPage - 1)" :disabled="currentPage <= 1"
         class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         :class="currentPage <= 1 ? 'text-slate-300' : 'text-slate-600 hover:bg-slate-100'">
@@ -34,11 +44,18 @@ const props = defineProps<{
   currentPage: number
   lastPage: number
   total: number
+  perPage: number
 }>()
 
 const emit = defineEmits<{
   page: [page: number]
+  'update:perPage': [value: number]
 }>()
+
+const perPageOptions = [5, 10, 25, 50, 100]
+
+const from = computed(() => Math.min((props.currentPage - 1) * props.perPage + 1, props.total))
+const to = computed(() => Math.min(props.currentPage * props.perPage, props.total))
 
 const pages = computed(() => {
   const { currentPage, lastPage } = props

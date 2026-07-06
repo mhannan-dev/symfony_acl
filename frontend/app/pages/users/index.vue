@@ -37,7 +37,7 @@
           </tr>
         </tbody>
       </table>
-      <Pagination :current-page="page" :last-page="lastPage" :total="total" @page="loadUsers" />
+      <Pagination :current-page="page" :last-page="lastPage" :total="total" :per-page="perPage" @page="loadUsers" @update:per-page="onPerPageChange" />
     </div>
 
     <ConfirmModal 
@@ -59,6 +59,7 @@ definePageMeta({
 const { get, del } = useApi()
 const users = ref<any[]>([])
 const page = ref(1)
+const perPage = ref(10)
 const lastPage = ref(1)
 const total = ref(0)
 
@@ -67,9 +68,15 @@ const itemToDelete = ref<number | null>(null)
 
 onMounted(() => loadUsers())
 
+function onPerPageChange(val: number) {
+  perPage.value = val
+  page.value = 1
+  loadUsers()
+}
+
 async function loadUsers(p?: number) {
   if (p) page.value = p
-  const { data } = await get<{ users: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/users?page=${page.value}&perPage=10`)
+  const { data } = await get<{ users: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/users?page=${page.value}&perPage=${perPage.value}`)
   if (data?.users) users.value = data.users
   if (data?.pagination) {
     lastPage.value = data.pagination.lastPage

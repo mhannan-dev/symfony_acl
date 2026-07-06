@@ -28,7 +28,7 @@
           </tr>
         </tbody>
       </table>
-      <Pagination :current-page="page" :last-page="lastPage" :total="total" @page="loadLogs" />
+      <Pagination :current-page="page" :last-page="lastPage" :total="total" :per-page="perPage" @page="loadLogs" @update:per-page="onPerPageChange" />
     </div>
   </div>
 </template>
@@ -44,14 +44,21 @@ definePageMeta({
 const { get } = useApi()
 const logs = ref<any[]>([])
 const page = ref(1)
+const perPage = ref(10)
 const lastPage = ref(1)
 const total = ref(0)
 
 onMounted(() => loadLogs())
 
+function onPerPageChange(val: number) {
+  perPage.value = val
+  page.value = 1
+  loadLogs()
+}
+
 async function loadLogs(p?: number) {
   if (p) page.value = p
-  const { data } = await get<{ logs: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/activity-logs?page=${page.value}&perPage=10`)
+  const { data } = await get<{ logs: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/activity-logs?page=${page.value}&perPage=${perPage.value}`)
   if (data?.logs) logs.value = data.logs
   if (data?.pagination) {
     lastPage.value = data.pagination.lastPage

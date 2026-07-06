@@ -52,7 +52,7 @@
           </tr>
         </tbody>
       </table>
-      <Pagination :current-page="page" :last-page="lastPage" :total="total" @page="loadPermissions" />
+      <Pagination :current-page="page" :last-page="lastPage" :total="total" :per-page="perPage" @page="loadPermissions" @update:per-page="onPerPageChange" />
     </div>
 
     <ConfirmModal 
@@ -74,6 +74,7 @@ definePageMeta({
 const { get, del } = useApi()
 const permissions = ref<any[]>([])
 const page = ref(1)
+const perPage = ref(10)
 const lastPage = ref(1)
 const total = ref(0)
 const searchQuery = ref('')
@@ -97,9 +98,15 @@ const itemToDelete = ref<number | null>(null)
 
 onMounted(() => loadPermissions())
 
+function onPerPageChange(val: number) {
+  perPage.value = val
+  page.value = 1
+  loadPermissions()
+}
+
 async function loadPermissions(p?: number) {
   if (p) page.value = p
-  const { data } = await get<{ permissions: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/permissions?page=${page.value}&perPage=10`)
+  const { data } = await get<{ permissions: any[]; pagination: { currentPage: number; lastPage: number; total: number } }>(`/permissions?page=${page.value}&perPage=${perPage.value}`)
   if (data?.permissions) permissions.value = data.permissions
   if (data?.pagination) {
     lastPage.value = data.pagination.lastPage
