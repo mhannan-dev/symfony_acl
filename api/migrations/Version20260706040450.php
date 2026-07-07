@@ -7,9 +7,6 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20260706040450 extends AbstractMigration
 {
     public function getDescription(): string
@@ -19,13 +16,31 @@ final class Version20260706040450 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('DROP INDEX UNIQ_F06D39705E237E06 ON `groups`');
+        $sm = $this->connection->createSchemaManager();
+        $fromSchema = $sm->introspectSchema();
+        $toSchema = clone $fromSchema;
+
+        $toSchema->getTable('groups')->dropIndex('UNIQ_F06D39705E237E06');
+
+        $diff = (new \Doctrine\DBAL\Schema\Comparator($this->connection->getDatabasePlatform()))->compareSchemas($fromSchema, $toSchema);
+        $queries = $this->connection->getDatabasePlatform()->getAlterSchemaSQL($diff);
+        foreach ($queries as $query) {
+            $this->addSql($query);
+        }
     }
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_F06D39705E237E06 ON `groups` (name)');
+        $sm = $this->connection->createSchemaManager();
+        $fromSchema = $sm->introspectSchema();
+        $toSchema = clone $fromSchema;
+
+        $toSchema->getTable('groups')->addUniqueIndex(['name'], 'UNIQ_F06D39705E237E06');
+
+        $diff = (new \Doctrine\DBAL\Schema\Comparator($this->connection->getDatabasePlatform()))->compareSchemas($fromSchema, $toSchema);
+        $queries = $this->connection->getDatabasePlatform()->getAlterSchemaSQL($diff);
+        foreach ($queries as $query) {
+            $this->addSql($query);
+        }
     }
 }

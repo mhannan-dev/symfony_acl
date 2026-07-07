@@ -7,9 +7,6 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20260707031923 extends AbstractMigration
 {
     public function getDescription(): string
@@ -19,15 +16,37 @@ final class Version20260707031923 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE `groups` ADD deleted_at DATETIME DEFAULT NULL');
-        $this->addSql('ALTER TABLE permissions ADD group_name VARCHAR(255) DEFAULT NULL, ADD deleted_at DATETIME DEFAULT NULL');
+        $sm = $this->connection->createSchemaManager();
+        $fromSchema = $sm->introspectSchema();
+        $toSchema = clone $fromSchema;
+
+        $toSchema->getTable('groups')->addColumn('deleted_at', 'datetime', ['notnull' => false]);
+        $toSchema->getTable('permissions')->addColumn('group_name', 'string', ['length' => 255, 'notnull' => false]);
+        $toSchema->getTable('permissions')->addColumn('deleted_at', 'datetime', ['notnull' => false]);
+
+        $platform = $this->connection->getDatabasePlatform();
+        $diff = (new \Doctrine\DBAL\Schema\Comparator($platform))->compareSchemas($fromSchema, $toSchema);
+        $queries = $platform->getAlterSchemaSQL($diff);
+        foreach ($queries as $query) {
+            $this->addSql($query);
+        }
     }
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE `groups` DROP deleted_at');
-        $this->addSql('ALTER TABLE permissions DROP group_name, DROP deleted_at');
+        $sm = $this->connection->createSchemaManager();
+        $fromSchema = $sm->introspectSchema();
+        $toSchema = clone $fromSchema;
+
+        $toSchema->getTable('groups')->dropColumn('deleted_at');
+        $toSchema->getTable('permissions')->dropColumn('group_name');
+        $toSchema->getTable('permissions')->dropColumn('deleted_at');
+
+        $platform = $this->connection->getDatabasePlatform();
+        $diff = (new \Doctrine\DBAL\Schema\Comparator($platform))->compareSchemas($fromSchema, $toSchema);
+        $queries = $platform->getAlterSchemaSQL($diff);
+        foreach ($queries as $query) {
+            $this->addSql($query);
+        }
     }
 }

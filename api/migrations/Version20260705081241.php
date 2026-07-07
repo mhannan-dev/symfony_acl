@@ -7,9 +7,6 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20260705081241 extends AbstractMigration
 {
     public function getDescription(): string
@@ -19,45 +16,106 @@ final class Version20260705081241 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE activity_logs (id INT AUTO_INCREMENT NOT NULL, action_time DATETIME NOT NULL, object_id LONGTEXT DEFAULT NULL, object_repr VARCHAR(255) NOT NULL, action_flag SMALLINT NOT NULL, change_message LONGTEXT NOT NULL, user_id INT NOT NULL, content_type_id INT DEFAULT NULL, INDEX IDX_F34B1DCEA76ED395 (user_id), INDEX IDX_F34B1DCE1A445520 (content_type_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE content_types (id INT AUTO_INCREMENT NOT NULL, app_label VARCHAR(255) NOT NULL, model VARCHAR(255) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE group_permissions (id INT AUTO_INCREMENT NOT NULL, group_id INT NOT NULL, permission_id INT NOT NULL, INDEX IDX_855D3AEFE54D947 (group_id), INDEX IDX_855D3AEFED90CCA (permission_id), UNIQUE INDEX unique_group_permission (group_id, permission_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE `groups` (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, UNIQUE INDEX UNIQ_F06D39705E237E06 (name), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE permissions (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, codename VARCHAR(255) NOT NULL, content_type_id INT NOT NULL, INDEX IDX_2DEDCC6F1A445520 (content_type_id), UNIQUE INDEX unique_content_codename (content_type_id, codename), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE reset_password_request (id INT AUTO_INCREMENT NOT NULL, selector VARCHAR(20) NOT NULL, hashed_token VARCHAR(100) NOT NULL, requested_at DATETIME NOT NULL, expires_at DATETIME NOT NULL, user_id INT NOT NULL, INDEX IDX_7CE748AA76ED395 (user_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE user_groups (id INT AUTO_INCREMENT NOT NULL, user_id INT NOT NULL, group_id INT NOT NULL, INDEX IDX_953F224DA76ED395 (user_id), INDEX IDX_953F224DFE54D947 (group_id), UNIQUE INDEX unique_user_group (user_id, group_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE user_permissions (id INT AUTO_INCREMENT NOT NULL, user_id INT NOT NULL, permission_id INT NOT NULL, INDEX IDX_84F605FAA76ED395 (user_id), INDEX IDX_84F605FAFED90CCA (permission_id), UNIQUE INDEX unique_user_permission (user_id, permission_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE users (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, UNIQUE INDEX UNIQ_1483A5E9E7927C74 (email), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('ALTER TABLE activity_logs ADD CONSTRAINT FK_F34B1DCEA76ED395 FOREIGN KEY (user_id) REFERENCES users (id)');
-        $this->addSql('ALTER TABLE activity_logs ADD CONSTRAINT FK_F34B1DCE1A445520 FOREIGN KEY (content_type_id) REFERENCES content_types (id)');
-        $this->addSql('ALTER TABLE group_permissions ADD CONSTRAINT FK_855D3AEFE54D947 FOREIGN KEY (group_id) REFERENCES `groups` (id)');
-        $this->addSql('ALTER TABLE group_permissions ADD CONSTRAINT FK_855D3AEFED90CCA FOREIGN KEY (permission_id) REFERENCES permissions (id)');
-        $this->addSql('ALTER TABLE permissions ADD CONSTRAINT FK_2DEDCC6F1A445520 FOREIGN KEY (content_type_id) REFERENCES content_types (id)');
-        $this->addSql('ALTER TABLE reset_password_request ADD CONSTRAINT FK_7CE748AA76ED395 FOREIGN KEY (user_id) REFERENCES users (id)');
-        $this->addSql('ALTER TABLE user_groups ADD CONSTRAINT FK_953F224DA76ED395 FOREIGN KEY (user_id) REFERENCES users (id)');
-        $this->addSql('ALTER TABLE user_groups ADD CONSTRAINT FK_953F224DFE54D947 FOREIGN KEY (group_id) REFERENCES `groups` (id)');
-        $this->addSql('ALTER TABLE user_permissions ADD CONSTRAINT FK_84F605FAA76ED395 FOREIGN KEY (user_id) REFERENCES users (id)');
-        $this->addSql('ALTER TABLE user_permissions ADD CONSTRAINT FK_84F605FAFED90CCA FOREIGN KEY (permission_id) REFERENCES permissions (id)');
+        $newSchema = new \Doctrine\DBAL\Schema\Schema();
+
+        $table = $newSchema->createTable('users');
+        $table->addColumn('id', 'integer', ['autoincrement' => true]);
+        $table->addColumn('name', 'string', ['length' => 255]);
+        $table->addColumn('email', 'string', ['length' => 255]);
+        $table->addColumn('password', 'string', ['length' => 255]);
+        $table->setPrimaryKey(['id']);
+        $table->addUniqueIndex(['email'], 'UNIQ_1483A5E9E7927C74');
+
+        $table = $newSchema->createTable('groups');
+        $table->addColumn('id', 'integer', ['autoincrement' => true]);
+        $table->addColumn('name', 'string', ['length' => 255]);
+        $table->setPrimaryKey(['id']);
+        $table->addUniqueIndex(['name'], 'UNIQ_F06D39705E237E06');
+
+        $table = $newSchema->createTable('content_types');
+        $table->addColumn('id', 'integer', ['autoincrement' => true]);
+        $table->addColumn('app_label', 'string', ['length' => 255]);
+        $table->addColumn('model', 'string', ['length' => 255]);
+        $table->setPrimaryKey(['id']);
+
+        $table = $newSchema->createTable('permissions');
+        $table->addColumn('id', 'integer', ['autoincrement' => true]);
+        $table->addColumn('name', 'string', ['length' => 255]);
+        $table->addColumn('codename', 'string', ['length' => 255]);
+        $table->addColumn('content_type_id', 'integer');
+        $table->setPrimaryKey(['id']);
+        $table->addForeignKeyConstraint('content_types', ['content_type_id'], ['id'], [], 'FK_2DEDCC6F1A445520');
+        $table->addUniqueIndex(['content_type_id', 'codename'], 'unique_content_codename');
+
+        $table = $newSchema->createTable('group_permissions');
+        $table->addColumn('id', 'integer', ['autoincrement' => true]);
+        $table->addColumn('group_id', 'integer');
+        $table->addColumn('permission_id', 'integer');
+        $table->setPrimaryKey(['id']);
+        $table->addForeignKeyConstraint('groups', ['group_id'], ['id'], [], 'FK_855D3AEFE54D947');
+        $table->addForeignKeyConstraint('permissions', ['permission_id'], ['id'], [], 'FK_855D3AEFED90CCA');
+        $table->addUniqueIndex(['group_id', 'permission_id'], 'unique_group_permission');
+
+        $table = $newSchema->createTable('user_groups');
+        $table->addColumn('id', 'integer', ['autoincrement' => true]);
+        $table->addColumn('user_id', 'integer');
+        $table->addColumn('group_id', 'integer');
+        $table->setPrimaryKey(['id']);
+        $table->addForeignKeyConstraint('users', ['user_id'], ['id'], [], 'FK_953F224DA76ED395');
+        $table->addForeignKeyConstraint('groups', ['group_id'], ['id'], [], 'FK_953F224DFE54D947');
+        $table->addUniqueIndex(['user_id', 'group_id'], 'unique_user_group');
+
+        $table = $newSchema->createTable('user_permissions');
+        $table->addColumn('id', 'integer', ['autoincrement' => true]);
+        $table->addColumn('user_id', 'integer');
+        $table->addColumn('permission_id', 'integer');
+        $table->setPrimaryKey(['id']);
+        $table->addForeignKeyConstraint('users', ['user_id'], ['id'], [], 'FK_84F605FAA76ED395');
+        $table->addForeignKeyConstraint('permissions', ['permission_id'], ['id'], [], 'FK_84F605FAFED90CCA');
+        $table->addUniqueIndex(['user_id', 'permission_id'], 'unique_user_permission');
+
+        $table = $newSchema->createTable('activity_logs');
+        $table->addColumn('id', 'integer', ['autoincrement' => true]);
+        $table->addColumn('action_time', 'datetime');
+        $table->addColumn('object_id', 'text', ['notnull' => false]);
+        $table->addColumn('object_repr', 'string', ['length' => 255]);
+        $table->addColumn('action_flag', 'smallint');
+        $table->addColumn('change_message', 'text');
+        $table->addColumn('user_id', 'integer');
+        $table->addColumn('content_type_id', 'integer', ['notnull' => false]);
+        $table->setPrimaryKey(['id']);
+        $table->addForeignKeyConstraint('users', ['user_id'], ['id'], [], 'FK_F34B1DCEA76ED395');
+        $table->addForeignKeyConstraint('content_types', ['content_type_id'], ['id'], [], 'FK_F34B1DCE1A445520');
+
+        $table = $newSchema->createTable('reset_password_request');
+        $table->addColumn('id', 'integer', ['autoincrement' => true]);
+        $table->addColumn('selector', 'string', ['length' => 20]);
+        $table->addColumn('hashed_token', 'string', ['length' => 100]);
+        $table->addColumn('requested_at', 'datetime');
+        $table->addColumn('expires_at', 'datetime');
+        $table->addColumn('user_id', 'integer');
+        $table->setPrimaryKey(['id']);
+        $table->addForeignKeyConstraint('users', ['user_id'], ['id'], [], 'FK_7CE748AA76ED395');
+
+        $platform = $this->connection->getDatabasePlatform();
+        $isMysql = $platform instanceof \Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
+        $queries = $newSchema->toSql($platform);
+
+        foreach ($queries as $query) {
+            if ($isMysql && str_starts_with($query, 'CREATE TABLE')) {
+                $this->addSql($query . ' DEFAULT CHARACTER SET utf8mb4');
+            } else {
+                $this->addSql($query);
+            }
+        }
     }
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE activity_logs DROP FOREIGN KEY FK_F34B1DCEA76ED395');
-        $this->addSql('ALTER TABLE activity_logs DROP FOREIGN KEY FK_F34B1DCE1A445520');
-        $this->addSql('ALTER TABLE group_permissions DROP FOREIGN KEY FK_855D3AEFE54D947');
-        $this->addSql('ALTER TABLE group_permissions DROP FOREIGN KEY FK_855D3AEFED90CCA');
-        $this->addSql('ALTER TABLE permissions DROP FOREIGN KEY FK_2DEDCC6F1A445520');
-        $this->addSql('ALTER TABLE reset_password_request DROP FOREIGN KEY FK_7CE748AA76ED395');
-        $this->addSql('ALTER TABLE user_groups DROP FOREIGN KEY FK_953F224DA76ED395');
-        $this->addSql('ALTER TABLE user_groups DROP FOREIGN KEY FK_953F224DFE54D947');
-        $this->addSql('ALTER TABLE user_permissions DROP FOREIGN KEY FK_84F605FAA76ED395');
-        $this->addSql('ALTER TABLE user_permissions DROP FOREIGN KEY FK_84F605FAFED90CCA');
         $this->addSql('DROP TABLE activity_logs');
         $this->addSql('DROP TABLE content_types');
         $this->addSql('DROP TABLE group_permissions');
-        $this->addSql('DROP TABLE `groups`');
+        $this->addSql('DROP TABLE groups');
         $this->addSql('DROP TABLE permissions');
         $this->addSql('DROP TABLE reset_password_request');
         $this->addSql('DROP TABLE user_groups');
