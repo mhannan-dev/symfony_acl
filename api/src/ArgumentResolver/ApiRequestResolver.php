@@ -17,7 +17,8 @@ class ApiRequestResolver implements ValueResolverInterface
     public function __construct(
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
-    ) {}
+    ) {
+    }
 
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
@@ -28,7 +29,7 @@ class ApiRequestResolver implements ValueResolverInterface
         }
 
         $data = [];
-        if (in_array($request->getContentTypeFormat(), ['json', 'jsonld'], true)) {
+        if (\in_array($request->getContentTypeFormat(), ['json', 'jsonld'], true)) {
             $data = json_decode($request->getContent(), true) ?? [];
         } else {
             $data = $request->request->all();
@@ -38,7 +39,7 @@ class ApiRequestResolver implements ValueResolverInterface
 
         $violations = $this->validator->validate($dto);
 
-        if (count($violations) > 0) {
+        if (\count($violations) > 0) {
             throw new ApiValidationException($violations);
         }
 

@@ -6,7 +6,6 @@ namespace App\Controller\Api;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 trait ApiResponseTrait
 {
@@ -17,7 +16,7 @@ trait ApiResponseTrait
     {
         return new JsonResponse([
             'status' => 'success',
-            'data'   => $data,
+            'data' => $data,
         ], $status, $headers);
     }
 
@@ -27,7 +26,7 @@ trait ApiResponseTrait
     protected function apiError(string $message, int $status = Response::HTTP_BAD_REQUEST, array $errors = [], array $headers = []): JsonResponse
     {
         $payload = [
-            'status'  => 'error',
+            'status' => 'error',
             'message' => $message,
         ];
 
@@ -41,15 +40,15 @@ trait ApiResponseTrait
     /**
      * Returns a standard JSON response for server errors (500).
      */
-    protected function apiServerError(string $message = 'Internal Server Error', Throwable $exception = null, array $headers = []): JsonResponse
+    protected function apiServerError(string $message = 'Internal Server Error', ?\Throwable $exception = null, array $headers = []): JsonResponse
     {
         $payload = [
-            'status'  => 'error',
+            'status' => 'error',
             'message' => $message,
         ];
 
         // In a real application, you might want to only expose exception details in dev environment
-        if ($exception && $_ENV['APP_ENV'] !== 'prod') {
+        if ($exception && 'prod' !== $_ENV['APP_ENV']) {
             $payload['exception'] = [
                 'message' => $exception->getMessage(),
                 'file' => $exception->getFile(),

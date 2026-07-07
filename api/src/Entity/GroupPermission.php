@@ -38,6 +38,7 @@ class GroupPermission
     public function setGroup(?Group $group): self
     {
         $this->group = $group;
+
         return $this;
     }
 
@@ -49,6 +50,7 @@ class GroupPermission
     public function setPermission(?Permission $permission): self
     {
         $this->permission = $permission;
+
         return $this;
     }
 }

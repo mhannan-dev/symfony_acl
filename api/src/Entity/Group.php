@@ -57,6 +57,7 @@ class Group
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -68,6 +69,7 @@ class Group
     public function setStatus(bool $status): self
     {
         $this->status = $status;
+
         return $this;
     }
 
@@ -79,6 +81,7 @@ class Group
     public function setDeletedAt(?\DateTimeImmutable $deletedAt): self
     {
         $this->deletedAt = $deletedAt;
+
         return $this;
     }
 
@@ -118,7 +121,7 @@ class Group
     #[SerializedName('groupPermissions')]
     public function getPermissionIds(): array
     {
-        return $this->groupPermissions->map(fn(GroupPermission $gp) => $gp->getPermission()->getId())->toArray();
+        return $this->groupPermissions->map(static fn (GroupPermission $gp) => $gp->getPermission()->getId())->toArray();
     }
 
     public function getUserGroups(): Collection

@@ -28,7 +28,7 @@ class PermissionVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        if (isset(self::ACTIONS[$attribute]) && is_string($subject)) {
+        if (isset(self::ACTIONS[$attribute]) && \is_string($subject)) {
             return true;
         }
 
@@ -47,8 +47,8 @@ class PermissionVoter extends Voter
             return false;
         }
 
-        if (isset(self::ACTIONS[$attribute]) && is_string($subject)) {
-            $codename = sprintf(self::ACTIONS[$attribute], $subject);
+        if (isset(self::ACTIONS[$attribute]) && \is_string($subject)) {
+            $codename = \sprintf(self::ACTIONS[$attribute], $subject);
         } else {
             $codename = $attribute;
         }

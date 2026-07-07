@@ -1,22 +1,26 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller\Api\V1;
 
+use App\Controller\Api\ApiResponseTrait;
 use App\Entity\Permission;
 use App\Repository\ContentTypeRepository;
 use App\Repository\PermissionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/v1/permissions')]
 class PermissionController extends AbstractController
 {
+    use ApiResponseTrait;
+
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly SerializerInterface $serializer,
@@ -36,7 +40,7 @@ class PermissionController extends AbstractController
 
         if ($search) {
             $qb->where('p.name LIKE :search OR p.codename LIKE :search OR ct.appLabel LIKE :search OR ct.model LIKE :search')
-               ->setParameter('search', '%' . $search . '%');
+               ->setParameter('search', '%'.$search.'%');
         }
 
         $total = (clone $qb)->select('COUNT(p.id)')->getQuery()->getSingleScalarResult();
@@ -46,7 +50,7 @@ class PermissionController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        return $this->json([
+        return $this->apiSuccess([
             'permissions' => $this->serializer->normalize($permissions, null, ['groups' => ['permission:read']]),
             'pagination' => [
                 'currentPage' => $page,
@@ -63,7 +67,7 @@ class PermissionController extends AbstractController
     {
         $contentTypes = $ctRepo->findAll();
 
-        return $this->json([
+        return $this->apiSuccess([
             'permission' => null,
             'contentTypes' => $this->serializer->normalize($contentTypes, null, ['groups' => ['content_type:read']]),
         ]);
@@ -87,7 +91,7 @@ class PermissionController extends AbstractController
         $this->em->persist($permission);
         $this->em->flush();
 
-        return $this->json([
+        return $this->apiSuccess([
             'permission' => $this->serializer->normalize($permission, null, ['groups' => ['permission:brief']]),
         ]);
     }
@@ -98,7 +102,7 @@ class PermissionController extends AbstractController
     {
         $contentTypes = $ctRepo->findAll();
 
-        return $this->json([
+        return $this->apiSuccess([
             'permission' => $this->serializer->normalize($permission, null, ['groups' => ['permission:read']]),
             'contentTypes' => $this->serializer->normalize($contentTypes, null, ['groups' => ['content_type:read']]),
         ]);
@@ -111,6 +115,6 @@ class PermissionController extends AbstractController
         $this->em->remove($permission);
         $this->em->flush();
 
-        return $this->json(['message' => 'Permission deleted.']);
+        return $this->apiSuccess(['message' => 'Permission deleted.']);
     }
 }

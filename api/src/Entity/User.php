@@ -65,6 +65,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -76,6 +77,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
         return $this;
     }
 
@@ -87,6 +89,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
         return $this;
     }
 
@@ -98,6 +101,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsActive(bool $isActive): self
     {
         $this->isActive = $isActive;
+
         return $this;
     }
 
@@ -136,9 +140,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         foreach ($this->getUserGroups() as $userGroup) {
             $groupName = $userGroup->getGroup()?->getName();
             if ($groupName) {
-                $roles[] = 'ROLE_' . strtoupper($groupName);
+                $roles[] = 'ROLE_'.strtoupper($groupName);
             }
         }
+
         return array_unique($roles);
     }
 

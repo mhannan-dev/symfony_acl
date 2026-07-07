@@ -1,0 +1,50 @@
+name: Lint
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  php-cs-fixer:
+    name: PHP-CS-Fixer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          tools: cs2pr
+      - run: composer install --no-progress --working-dir=api
+      - run: vendor/bin/php-cs-fixer check --diff --using-cache=no
+        working-directory: api
+
+  phpstan:
+    name: PHPStan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+      - run: composer install --no-progress --working-dir=api
+      - run: vendor/bin/phpstan analyse --no-progress
+        working-directory: api
+
+  lint:
+    name: Linters
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+      - run: composer install --no-progress --working-dir=api
+      - run: composer validate --no-check-publish --strict
+        working-directory: api
+      - run: php bin/console lint:yaml config --parse-tags --no-debug
+        working-directory: api
+      - run: php bin/console lint:container --no-debug
+        working-directory: api
+      - run: composer audit --working-dir=api

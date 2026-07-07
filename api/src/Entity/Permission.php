@@ -66,6 +66,7 @@ class Permission
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -77,6 +78,7 @@ class Permission
     public function setContentType(?ContentType $contentType): self
     {
         $this->contentType = $contentType;
+
         return $this;
     }
 
@@ -88,6 +90,7 @@ class Permission
     public function setCodename(string $codename): self
     {
         $this->codename = $codename;
+
         return $this;
     }
 
@@ -99,6 +102,7 @@ class Permission
     public function setGroupName(?string $groupName): self
     {
         $this->groupName = $groupName;
+
         return $this;
     }
 
@@ -110,6 +114,7 @@ class Permission
     public function setDeletedAt(?\DateTimeImmutable $deletedAt): self
     {
         $this->deletedAt = $deletedAt;
+
         return $this;
     }
 

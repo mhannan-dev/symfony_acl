@@ -58,6 +58,7 @@ class ActivityLog
     public function setActionTime(\DateTimeInterface $actionTime): self
     {
         $this->actionTime = $actionTime;
+
         return $this;
     }
 
@@ -69,6 +70,7 @@ class ActivityLog
     public function setObjectId(?string $objectId): self
     {
         $this->objectId = $objectId;
+
         return $this;
     }
 
@@ -80,6 +82,7 @@ class ActivityLog
     public function setObjectRepr(string $objectRepr): self
     {
         $this->objectRepr = $objectRepr;
+
         return $this;
     }
 
@@ -91,6 +94,7 @@ class ActivityLog
     public function setActionFlag(int $actionFlag): self
     {
         $this->actionFlag = $actionFlag;
+
         return $this;
     }
 
@@ -102,6 +106,7 @@ class ActivityLog
     public function setChangeMessage(string $changeMessage): self
     {
         $this->changeMessage = $changeMessage;
+
         return $this;
     }
 
@@ -113,6 +118,7 @@ class ActivityLog
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -124,6 +130,7 @@ class ActivityLog
     public function setContentType(?ContentType $contentType): self
     {
         $this->contentType = $contentType;
+
         return $this;
     }
 }

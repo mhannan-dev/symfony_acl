@@ -17,14 +17,15 @@ class PermissionCheckService
 
     public function hasPermission(User $user, string $codename): bool
     {
-        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles(), true)) {
+        if (\in_array('ROLE_SUPER_ADMIN', $user->getRoles(), true)) {
             return true;
         }
 
-        $cacheKey = sprintf('user_permissions_%d', $user->getId());
+        $cacheKey = \sprintf('user_permissions_%d', $user->getId());
 
         $permissions = $this->cache->get($cacheKey, function (ItemInterface $item) use ($user) {
             $item->expiresAfter(3600);
+
             return $this->getUserPermissions($user);
         });
 
@@ -44,6 +45,7 @@ class PermissionCheckService
                 return true;
             }
         }
+
         return false;
     }
 
@@ -54,6 +56,7 @@ class PermissionCheckService
                 return false;
             }
         }
+
         return true;
     }
 

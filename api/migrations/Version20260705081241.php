@@ -16,7 +16,7 @@ final class Version20260705081241 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $newSchema = new \Doctrine\DBAL\Schema\Schema();
+        $newSchema = new Schema();
 
         $table = $newSchema->createTable('users');
         $table->addColumn('id', 'integer', ['autoincrement' => true]);
@@ -103,7 +103,7 @@ final class Version20260705081241 extends AbstractMigration
 
         foreach ($queries as $query) {
             if ($isMysql && str_starts_with($query, 'CREATE TABLE')) {
-                $this->addSql($query . ' DEFAULT CHARACTER SET utf8mb4');
+                $this->addSql($query.' DEFAULT CHARACTER SET utf8mb4');
             } else {
                 $this->addSql($query);
             }

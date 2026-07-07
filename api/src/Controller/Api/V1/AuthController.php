@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Controller\Api\V1;
 
+use App\Controller\Api\ApiResponseTrait;
 use App\DTO\LoginRequest;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\PermissionCheckService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use App\Service\PermissionCheckService;
-use App\Controller\Api\ApiResponseTrait;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/v1')]
 class AuthController extends AbstractController
@@ -25,7 +25,7 @@ class AuthController extends AbstractController
     use ApiResponseTrait;
 
     public function __construct(
-        private readonly SerializerInterface $serializer
+        private readonly SerializerInterface $serializer,
     ) {
     }
 
@@ -35,7 +35,7 @@ class AuthController extends AbstractController
         UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
         Security $security,
-        PermissionCheckService $permissionCheckService
+        PermissionCheckService $permissionCheckService,
     ): JsonResponse {
         $user = $userRepository->findOneBy(['email' => $request->email]);
 
@@ -46,7 +46,7 @@ class AuthController extends AbstractController
         $security->login($user, 'security.authenticator.form_login.main');
 
         $permissions = array_values(array_filter(array_map(
-            fn($p) => $p['codename'] ?? null,
+            static fn ($p) => $p['codename'] ?? null,
             $permissionCheckService->getUserPermissions($user)
         )));
 
@@ -76,7 +76,7 @@ class AuthController extends AbstractController
         }
 
         $permissions = array_values(array_filter(array_map(
-            fn($p) => $p['codename'] ?? null,
+            static fn ($p) => $p['codename'] ?? null,
             $permissionCheckService->getUserPermissions($user)
         )));
 
@@ -94,7 +94,7 @@ class AuthController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         UserPasswordHasherInterface $passwordHasher,
-        PermissionCheckService $permissionCheckService
+        PermissionCheckService $permissionCheckService,
     ): JsonResponse {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -121,7 +121,7 @@ class AuthController extends AbstractController
         $em->flush();
 
         $permissions = array_values(array_filter(array_map(
-            fn($p) => $p['codename'] ?? null,
+            static fn ($p) => $p['codename'] ?? null,
             $permissionCheckService->getUserPermissions($user)
         )));
 
@@ -131,7 +131,7 @@ class AuthController extends AbstractController
 
         return $this->apiSuccess([
             'user' => $userData,
-            'message' => 'Profile updated successfully.'
+            'message' => 'Profile updated successfully.',
         ]);
     }
 
@@ -139,6 +139,7 @@ class AuthController extends AbstractController
     public function logout(Security $security): JsonResponse
     {
         $security->logout(false);
+
         return $this->apiSuccess(['message' => 'Logged out successfully.']);
     }
 }

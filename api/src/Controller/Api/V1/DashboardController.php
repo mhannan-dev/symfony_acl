@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Api\V1;
 
-use App\Entity\User;
+use App\Controller\Api\ApiResponseTrait;
 use App\Repository\ActivityLogRepository;
 use App\Repository\ContentTypeRepository;
 use App\Repository\GroupRepository;
@@ -12,13 +12,15 @@ use App\Repository\PermissionRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/v1')]
 class DashboardController extends AbstractController
 {
+    use ApiResponseTrait;
+
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly SerializerInterface $serializer,
@@ -42,7 +44,6 @@ class DashboardController extends AbstractController
              GROUP BY g.id, g.name
              ORDER BY count DESC'
         );
-
 
         $permsPerContentType = $conn->fetchAllAssociative(
             'SELECT ct.app_label, ct.model, COUNT(p.id) as count
@@ -73,9 +74,9 @@ class DashboardController extends AbstractController
         $unassigned = [];
 
         foreach ($userTreeRows as $row) {
-            $uId = 'user_' . $row['user_id'] . '_' . (int)$row['group_id'];
+            $uId = 'user_'.$row['user_id'].'_'.(int) $row['group_id'];
             $uName = $row['user_name'];
-            $gId = $row['group_id'] ? 'group_' . $row['group_id'] : null;
+            $gId = $row['group_id'] ? 'group_'.$row['group_id'] : null;
             $gName = $row['group_name'];
 
             $userNode = ['id' => $uId, 'name' => $uName];
@@ -85,7 +86,7 @@ class DashboardController extends AbstractController
                     $groupsMap[$gId] = [
                         'id' => $gId,
                         'name' => $gName,
-                        'children' => []
+                        'children' => [],
                     ];
                 }
                 $groupsMap[$gId]['children'][] = $userNode;
@@ -98,14 +99,14 @@ class DashboardController extends AbstractController
             $groupsMap['group_unassigned'] = [
                 'id' => 'group_unassigned',
                 'name' => 'Unassigned',
-                'children' => $unassigned
+                'children' => $unassigned,
             ];
         }
 
         $userTree = [
             'id' => 'root',
             'name' => 'Symfony ACL Users',
-            'children' => array_values($groupsMap)
+            'children' => array_values($groupsMap),
         ];
 
         // Schema Tree
@@ -115,30 +116,32 @@ class DashboardController extends AbstractController
         $schemaTreeNodes = [];
         foreach ($tables as $table) {
             $tableName = $table->getName();
-            if ($tableName === 'doctrine_migration_versions') continue;
-            
+            if ('doctrine_migration_versions' === $tableName) {
+                continue;
+            }
+
             $columnNodes = [];
             foreach ($table->getColumns() as $column) {
-                $typeClass = get_class($column->getType());
+                $typeClass = \get_class($column->getType());
                 $typeName = str_replace('Type', '', basename(str_replace('\\', '/', $typeClass)));
-                
+
                 $columnNodes[] = [
-                    'id' => 'col_' . $tableName . '_' . $column->getName(),
+                    'id' => 'col_'.$tableName.'_'.$column->getName(),
                     'name' => $column->getName(),
-                    'type' => $typeName
+                    'type' => $typeName,
                 ];
             }
             $schemaTreeNodes[] = [
-                'id' => 'tbl_' . $tableName,
+                'id' => 'tbl_'.$tableName,
                 'name' => $tableName,
-                'children' => $columnNodes
+                'children' => $columnNodes,
             ];
         }
 
         $schemaTree = [
             'id' => 'schema_root',
             'name' => 'Symfony ACL Database',
-            'children' => $schemaTreeNodes
+            'children' => $schemaTreeNodes,
         ];
 
         $responseData = [
@@ -157,6 +160,6 @@ class DashboardController extends AbstractController
             ],
         ];
 
-        return $this->json($this->serializer->normalize($responseData));
+        return $this->apiSuccess($this->serializer->normalize($responseData));
     }
 }

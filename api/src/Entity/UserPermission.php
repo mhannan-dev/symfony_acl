@@ -36,6 +36,7 @@ class UserPermission
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -47,6 +48,7 @@ class UserPermission
     public function setPermission(?Permission $permission): self
     {
         $this->permission = $permission;
+
         return $this;
     }
 }

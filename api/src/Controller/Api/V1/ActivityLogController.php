@@ -1,20 +1,23 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller\Api\V1;
 
-use App\Entity\ActivityLog;
+use App\Controller\Api\ApiResponseTrait;
 use App\Repository\ActivityLogRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/v1/activity-logs')]
 class ActivityLogController extends AbstractController
 {
+    use ApiResponseTrait;
+
     public function __construct(
         private readonly SerializerInterface $serializer,
     ) {
@@ -34,7 +37,7 @@ class ActivityLogController extends AbstractController
 
         if ($search) {
             $qb->where('l.objectRepr LIKE :search OR l.changeMessage LIKE :search OR u.name LIKE :search OR ct.appLabel LIKE :search')
-               ->setParameter('search', '%' . $search . '%');
+               ->setParameter('search', '%'.$search.'%');
         }
 
         $total = (clone $qb)->select('COUNT(l.id)')->getQuery()->getSingleScalarResult();
@@ -45,7 +48,7 @@ class ActivityLogController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        return $this->json([
+        return $this->apiSuccess([
             'logs' => $this->serializer->normalize($logs, null, ['groups' => ['activity_log:read']]),
             'pagination' => [
                 'currentPage' => $page,

@@ -1,21 +1,22 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller\Api\V1;
 
+use App\Controller\Api\ApiResponseTrait;
 use App\Entity\User;
 use App\Entity\UserGroup;
 use App\Repository\GroupRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Controller\Api\ApiResponseTrait;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/v1/users')]
 class UserController extends AbstractController
@@ -41,7 +42,7 @@ class UserController extends AbstractController
 
         if ($search) {
             $qb->where('u.name LIKE :search OR u.email LIKE :search')
-               ->setParameter('search', '%' . $search . '%');
+               ->setParameter('search', '%'.$search.'%');
         }
 
         $total = (clone $qb)->select('COUNT(u.id)')->getQuery()->getSingleScalarResult();
@@ -120,7 +121,7 @@ class UserController extends AbstractController
     public function edit(User $user, GroupRepository $groupRepo): JsonResponse
     {
         $groups = $groupRepo->findAll();
-        $userGroupIds = array_map(fn($ug) => $ug->getGroup()->getId(), $user->getUserGroups()->toArray());
+        $userGroupIds = array_map(static fn ($ug) => $ug->getGroup()->getId(), $user->getUserGroups()->toArray());
 
         return $this->apiSuccess([
             'user' => $this->serializer->normalize($user, null, ['groups' => ['user:read']]),

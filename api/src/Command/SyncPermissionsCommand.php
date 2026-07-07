@@ -19,7 +19,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class SyncPermissionsCommand extends Command
 {
     public function __construct(
-        private EntityManagerInterface $em
+        private EntityManagerInterface $em,
     ) {
         parent::__construct();
     }
@@ -34,7 +34,7 @@ class SyncPermissionsCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $isDryRun = $input->getOption('dry-run');
-        
+
         $title = 'Syncing ContentTypes and Permissions';
         if ($isDryRun) {
             $title .= ' (DRY RUN)';
@@ -52,7 +52,7 @@ class SyncPermissionsCommand extends Command
             'add' => 'Can add',
             'change' => 'Can change',
             'delete' => 'Can delete',
-            'view' => 'Can view'
+            'view' => 'Can view',
         ];
 
         foreach ($metadatas as $metadata) {
@@ -68,7 +68,7 @@ class SyncPermissionsCommand extends Command
                 \App\Entity\ActivityLog::class,
             ];
 
-            if (in_array($className, $excludedEntities)) {
+            if (\in_array($className, $excludedEntities)) {
                 continue;
             }
 
@@ -91,33 +91,33 @@ class SyncPermissionsCommand extends Command
                     // Flush immediately so we have the ID for the permission lookup/creation
                     $this->em->flush();
                 } else {
-                    $io->note(sprintf('Would create ContentType: %s.%s', $appLabel, $model));
+                    $io->note(\sprintf('Would create ContentType: %s.%s', $appLabel, $model));
                 }
-                $createdContentTypes++;
+                ++$createdContentTypes;
             }
 
             // Create default permissions
             foreach ($actions as $action => $actionLabel) {
-                $codename = sprintf('%s_%s', $action, $model);
+                $codename = \sprintf('%s_%s', $action, $model);
 
                 $permission = $permissionRepo->findOneBy([
                     'contentType' => $contentType,
-                    'codename' => $codename
+                    'codename' => $codename,
                 ]);
 
                 if (!$permission) {
                     $permission = new Permission();
                     $permission->setContentType($contentType);
                     $permission->setCodename($codename);
-                    $permission->setName(sprintf('%s %s', $actionLabel, strtolower($modelName)));
+                    $permission->setName(\sprintf('%s %s', $actionLabel, strtolower($modelName)));
                     $permission->setGroupName(ucfirst($appLabel));
-                    
+
                     if (!$isDryRun) {
                         $this->em->persist($permission);
                     } else {
-                        $io->note(sprintf('Would create Permission: %s (Group: %s)', $codename, ucfirst($appLabel)));
+                        $io->note(\sprintf('Would create Permission: %s (Group: %s)', $codename, ucfirst($appLabel)));
                     }
-                    $createdPermissions++;
+                    ++$createdPermissions;
                 }
             }
         }
@@ -127,9 +127,9 @@ class SyncPermissionsCommand extends Command
         }
 
         if ($isDryRun) {
-            $io->success(sprintf('Dry-run complete! Would have created %d ContentTypes and %d Permissions.', $createdContentTypes, $createdPermissions));
+            $io->success(\sprintf('Dry-run complete! Would have created %d ContentTypes and %d Permissions.', $createdContentTypes, $createdPermissions));
         } else {
-            $io->success(sprintf('Done! Created %d ContentTypes and %d Permissions.', $createdContentTypes, $createdPermissions));
+            $io->success(\sprintf('Done! Created %d ContentTypes and %d Permissions.', $createdContentTypes, $createdPermissions));
         }
 
         return Command::SUCCESS;

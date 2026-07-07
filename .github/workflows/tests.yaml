@@ -1,0 +1,29 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  phpunit:
+    name: PHPUnit (PHP ${{ matrix.php }})
+    strategy:
+      matrix:
+        php: [8.2, 8.3, 8.4]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo_sqlite
+      - run: composer install --no-progress --working-dir=api
+      - run: php bin/console doctrine:database:create --env=test
+        working-directory: api
+      - run: php bin/console doctrine:migrations:migrate --no-interaction --env=test
+        working-directory: api
+      - run: vendor/bin/phpunit
+        working-directory: api

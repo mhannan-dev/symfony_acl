@@ -1,4 +1,5 @@
 <?php
+
 $pdo = new PDO('mysql:host=127.0.0.1;dbname=symfony_acl;charset=utf8mb4', 'root', '');
 
 // Fetch group permissions

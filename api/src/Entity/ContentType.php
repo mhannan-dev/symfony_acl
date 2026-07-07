@@ -52,6 +52,7 @@ class ContentType
     public function setAppLabel(string $appLabel): self
     {
         $this->appLabel = $appLabel;
+
         return $this;
     }
 
@@ -63,6 +64,7 @@ class ContentType
     public function setModel(string $model): self
     {
         $this->model = $model;
+
         return $this;
     }
 
@@ -73,7 +75,7 @@ class ContentType
     #[SerializedName('permissions')]
     public function getPermissionIds(): array
     {
-        return $this->permissions->map(fn(Permission $p) => $p->getId())->toArray();
+        return $this->permissions->map(static fn (Permission $p) => $p->getId())->toArray();
     }
 
     public function getPermissions(): Collection
