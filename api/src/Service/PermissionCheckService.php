@@ -4,38 +4,37 @@ namespace App\Service;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class PermissionCheckService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
+        private readonly CacheInterface $cache,
     ) {
     }
 
     public function hasPermission(User $user, string $codename): bool
     {
-        $conn = $this->em->getConnection();
-
-        $direct = $conn->fetchOne(
-            'SELECT 1 FROM user_permissions up
-             JOIN permissions p ON p.id = up.permission_id
-             WHERE up.user_id = :userId AND p.codename = :codename',
-            ['userId' => $user->getId(), 'codename' => $codename]
-        );
-
-        if ($direct) {
+        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles(), true)) {
             return true;
         }
 
-        $group = $conn->fetchOne(
-            'SELECT 1 FROM user_groups ug
-             JOIN group_permissions gp ON gp.group_id = ug.group_id
-             JOIN permissions p ON p.id = gp.permission_id
-             WHERE ug.user_id = :userId AND p.codename = :codename',
-            ['userId' => $user->getId(), 'codename' => $codename]
-        );
+        $cacheKey = sprintf('user_permissions_%d', $user->getId());
 
-        return (bool) $group;
+        $permissions = $this->cache->get($cacheKey, function (ItemInterface $item) use ($user) {
+            $item->expiresAfter(3600);
+            return $this->getUserPermissions($user);
+        });
+
+        foreach ($permissions as $permission) {
+            if ($permission['codename'] === $codename) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function hasAnyPermission(User $user, string ...$codenames): bool

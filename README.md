@@ -35,7 +35,7 @@ php -S 127.0.0.1:8000 -t public
 ### 2. Running the Frontend (UI)
 ```bash
 cd frontend
-npm install
+npm install;
 
 # Start the Nuxt development server
 npm run dev

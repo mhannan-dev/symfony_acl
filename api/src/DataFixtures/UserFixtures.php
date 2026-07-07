@@ -33,6 +33,7 @@ class UserFixtures extends Fixture
             $user->setEmail($data['email']);
             $user->setName($data['name']);
             $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
+            $user->setIsActive($data['isActive'] ?? true);
             $manager->persist($user);
             $this->addReference($data['ref'], $user);
         }

@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Controller\Api;
+declare(strict_types=1);
+
+namespace App\Controller\Api\V1;
 
 use App\Repository\ActivityLogRepository;
 use App\Repository\GroupRepository;
@@ -13,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/v1')]
 class DashboardController extends AbstractController
 {
-    #[Route('/dashboard/stats', name: 'api_dashboard_stats', methods: ['GET'])]
+    #[Route('/dashboard/stats', name: 'api_v1_dashboard_stats', methods: ['GET'])]
     public function stats(
         UserRepository $userRepo,
         GroupRepository $groupRepo,

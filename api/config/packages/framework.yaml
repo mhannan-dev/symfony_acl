@@ -8,6 +8,10 @@ framework:
     #esi: true
     #fragments: true
 
+    serializer:
+        enabled: true
+        circular_reference_handler: App\Serializer\CircularReferenceHandler
+
 when@test:
     framework:
         test: true

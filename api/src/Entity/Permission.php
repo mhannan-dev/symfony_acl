@@ -6,7 +6,10 @@ use App\Repository\PermissionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Symfony\Component\Serializer\Attribute\Groups;
 
+#[Gedmo\SoftDeleteable(fieldName: 'deletedAt')]
 #[ORM\Entity(repositoryClass: PermissionRepository::class)]
 #[ORM\Table(name: 'permissions')]
 #[ORM\UniqueConstraint(name: 'unique_content_codename', columns: ['content_type_id', 'codename'])]
@@ -15,17 +18,28 @@ class Permission
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['permission:read', 'permission:brief', 'group:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['permission:read', 'permission:brief'])]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'permissions')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['permission:read'])]
     private ?ContentType $contentType = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['permission:read', 'permission:brief', 'group:read'])]
     private ?string $codename = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['permission:read'])]
+    private ?string $groupName = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $deletedAt = null;
 
     #[ORM\OneToMany(mappedBy: 'permission', targetEntity: GroupPermission::class)]
     private Collection $groupPermissions;
@@ -74,6 +88,28 @@ class Permission
     public function setCodename(string $codename): self
     {
         $this->codename = $codename;
+        return $this;
+    }
+
+    public function getGroupName(): ?string
+    {
+        return $this->groupName;
+    }
+
+    public function setGroupName(?string $groupName): self
+    {
+        $this->groupName = $groupName;
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deletedAt): self
+    {
+        $this->deletedAt = $deletedAt;
         return $this;
     }
 

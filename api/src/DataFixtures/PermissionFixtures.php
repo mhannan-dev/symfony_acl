@@ -41,7 +41,7 @@ class PermissionFixtures extends Fixture implements DependentFixtureInterface
         $p = new Permission();
         $p->setContentType($ct);
         $p->setCodename($codename);
-        $p->setName(ucfirst($codename) . ' ' . ucfirst($ct->getModel()));
+        $p->setName($codename);
         return $p;
     }
 

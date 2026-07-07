@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\GroupPermissionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: GroupPermissionRepository::class)]
 #[ORM\Table(name: 'group_permissions')]
@@ -21,6 +22,7 @@ class GroupPermission
 
     #[ORM\ManyToOne(inversedBy: 'groupPermissions')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['group:read'])]
     private ?Permission $permission = null;
 
     public function getId(): ?int

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UserGroupRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserGroupRepository::class)]
 #[ORM\Table(name: 'user_groups')]
@@ -13,6 +14,7 @@ class UserGroup
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'userGroups')]
@@ -21,6 +23,7 @@ class UserGroup
 
     #[ORM\ManyToOne(inversedBy: 'userGroups')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['user:read'])]
     private ?Group $group = null;
 
     public function getId(): ?int

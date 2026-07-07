@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/v1/users')]
 class UserController extends AbstractController
@@ -20,6 +21,7 @@ class UserController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly UserPasswordHasherInterface $hasher,
+        private readonly SerializerInterface $serializer,
     ) {
     }
 
@@ -45,18 +47,8 @@ class UserController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        $data = array_map(fn(User $user) => [
-            'id' => $user->getId(),
-            'name' => $user->getName(),
-            'email' => $user->getEmail(),
-            'userGroups' => array_map(
-                fn(UserGroup $ug) => ['id' => $ug->getId(), 'group' => ['id' => $ug->getGroup()->getId(), 'name' => $ug->getGroup()->getName()]],
-                $user->getUserGroups()->toArray()
-            ),
-        ], $users);
-
         return $this->json([
-            'users' => $data,
+            'users' => $this->serializer->normalize($users, null, ['groups' => ['user:read']]),
             'pagination' => [
                 'currentPage' => $page,
                 'perPage' => $perPage,
@@ -71,9 +63,12 @@ class UserController extends AbstractController
     public function new(GroupRepository $groupRepo): JsonResponse
     {
         $groups = $groupRepo->findAll();
-        $data = array_map(fn($g) => ['id' => $g->getId(), 'name' => $g->getName()], $groups);
 
-        return $this->json(['groups' => $data, 'user' => null, 'userGroupIds' => []]);
+        return $this->json([
+            'groups' => $this->serializer->normalize($groups, null, ['groups' => ['group:brief']]),
+            'user' => null,
+            'userGroupIds' => [],
+        ]);
     }
 
     #[Route('/save', name: 'api_v1_users_save', methods: ['POST'])]
@@ -94,8 +89,7 @@ class UserController extends AbstractController
             $this->em->remove($ug);
         }
         $user->getUserGroups()->clear();
-        $this->em->flush(); // Flush the DELETEs first to avoid unique constraint violations
-
+        $this->em->flush();
 
         $selectedGroupIds = $data['groupIds'] ?? [];
         foreach ($selectedGroupIds as $groupId) {
@@ -112,7 +106,9 @@ class UserController extends AbstractController
         $this->em->persist($user);
         $this->em->flush();
 
-        return $this->json(['user' => ['id' => $user->getId(), 'name' => $user->getName(), 'email' => $user->getEmail()]]);
+        return $this->json([
+            'user' => $this->serializer->normalize($user, null, ['groups' => ['user:brief']]),
+        ]);
     }
 
     #[Route('/{id}/edit', name: 'api_v1_users_edit_form', methods: ['GET'])]
@@ -123,13 +119,22 @@ class UserController extends AbstractController
         $userGroupIds = array_map(fn($ug) => $ug->getGroup()->getId(), $user->getUserGroups()->toArray());
 
         return $this->json([
-            'user' => [
-                'id' => $user->getId(),
-                'name' => $user->getName(),
-                'email' => $user->getEmail(),
-            ],
-            'groups' => array_map(fn($g) => ['id' => $g->getId(), 'name' => $g->getName()], $groups),
+            'user' => $this->serializer->normalize($user, null, ['groups' => ['user:read']]),
+            'groups' => $this->serializer->normalize($groups, null, ['groups' => ['group:brief']]),
             'userGroupIds' => $userGroupIds,
+        ]);
+    }
+
+    #[Route('/{id}/toggle-status', name: 'api_v1_users_toggle_status', methods: ['PATCH'])]
+    #[IsGranted('change_user')]
+    public function toggleStatus(User $user): JsonResponse
+    {
+        $user->setIsActive(!$user->isActive());
+        $this->em->flush();
+
+        return $this->json([
+            'id' => $user->getId(),
+            'isActive' => $user->isActive(),
         ]);
     }
 

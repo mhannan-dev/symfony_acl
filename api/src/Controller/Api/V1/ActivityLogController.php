@@ -9,10 +9,16 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/v1/activity-logs')]
 class ActivityLogController extends AbstractController
 {
+    public function __construct(
+        private readonly SerializerInterface $serializer,
+    ) {
+    }
+
     #[Route('', name: 'api_v1_activity_logs_list', methods: ['GET'])]
     #[IsGranted('view_activity_log')]
     public function index(Request $request, ActivityLogRepository $repo): JsonResponse
@@ -38,18 +44,8 @@ class ActivityLogController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        $data = array_map(fn(ActivityLog $log) => [
-            'id' => $log->getId(),
-            'actionTime' => $log->getActionTime()?->format('c'),
-            'actionFlag' => $log->getActionFlag(),
-            'objectRepr' => $log->getObjectRepr(),
-            'changeMessage' => $log->getChangeMessage(),
-            'user' => $log->getUser() ? ['id' => $log->getUser()->getId(), 'name' => $log->getUser()->getName()] : null,
-            'contentType' => $log->getContentType() ? ['appLabel' => $log->getContentType()->getAppLabel()] : null,
-        ], $logs);
-
         return $this->json([
-            'logs' => $data,
+            'logs' => $this->serializer->normalize($logs, null, ['groups' => ['activity_log:read']]),
             'pagination' => [
                 'currentPage' => $page,
                 'perPage' => $perPage,

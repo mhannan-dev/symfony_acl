@@ -43,7 +43,17 @@ Whenever I ask you to write code for this project, you MUST strictly adhere to t
 - Use **Security Voters** for complex authorization logic
 - Never hardcode permission checks in controller actions
 
-## 7. Events & Loose Coupling
+## 7. Serialization (Symfony Serializer)
+- **Use `SerializerInterface` in all controllers** — inject via constructor, never use `array_map()` for building response arrays
+- **Define `#[Groups]` attributes on entity properties** to control API output:
+  - `{entity}:read` — Full details (list/detail views)
+  - `{entity}:brief` — Minimal details (nested/relation references)
+- **Alias method outputs** with `#[SerializedName('fieldName')]` when the serialized field name should differ from the property
+- **Circular references** are automatically resolved by `App\Serializer\CircularReferenceHandler` (returns entity ID)
+- **DateTime fields** serialize in RFC3339 format via the built-in `DateTimeNormalizer`
+- **Never expose sensitive data** (passwords, secrets) via serialization groups
+
+## 8. Events & Loose Coupling
 - Use **EventDispatcher** for cross-cutting concerns (logging, notifications, audit trails)
 - Create Event classes in `src/Event/` for domain actions
 - Create **EventSubscribers** (tagged with `#[AsEventListener]`) in `src/EventSubscriber/`

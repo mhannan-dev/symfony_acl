@@ -48,6 +48,7 @@ class AuthController extends AbstractController
                 'name' => $user->getName(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
+                'isActive' => $user->isActive(),
                 'permissions' => $permissions,
             ],
         ]);
@@ -80,6 +81,7 @@ class AuthController extends AbstractController
                 'name' => $user->getName(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
+                'isActive' => $user->isActive(),
                 'permissions' => $permissions,
             ],
         ]);

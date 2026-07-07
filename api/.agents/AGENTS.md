@@ -27,6 +27,7 @@ src/
 ├── Exception/          # Custom exceptions
 ├── Repository/         # Doctrine repositories (one per entity)
 ├── Security/           # Voters, authenticators, user providers
+├── Serializer/         # Serializer custom handlers, normalizers
 ├── Service/            # Business logic services (constructor injection)
 └── Twig/               # Twig extensions (if needed for emails)
 ```
@@ -90,12 +91,17 @@ class UserService
 - **Database queries MUST NOT be in controllers** — delegate to Repositories
 - **Use DTOs with validation attributes** for request data — never validate manually in controllers
 - **Return `JsonResponse`** for all API endpoints
+- **Use Symfony Serializer** — never manually build response arrays with `array_map()`; use `$serializer->normalize()` with serialization groups instead
 
 ### 6. Entity & Repository Rules
 - Entities use **Doctrine ORM attributes** (not annotations or YAML)
 - Repositories extend **`ServiceEntityRepository`** and are auto-wired
 - Keep custom query methods in repositories — do not use `createQueryBuilder` in services
 - Use **`findBy()`** for simple queries and **custom DQL/QueryBuilder methods** for complex ones
+- Use **`#[Groups]` attributes** on entity properties to control API serialization
+  - Use `{entity}:read` for list/detail views, `{entity}:brief` for nested references
+  - Use `#[SerializedName]` to alias methods when the serialized field name differs from the property name
+  - Never expose sensitive fields (e.g. `password`) via serialization groups
 
 ### 7. Loose Coupling with Events
 - Use **Symfony EventDispatcher** for cross-cutting concerns (logging, notifications, audit)
@@ -157,3 +163,13 @@ class UserService
 - Use `.env` for default values, `.env.local` for local overrides (never commit)
 - Never commit real secrets — use `.env.local` placeholders
 - Validate configuration with Symfony's configuration tree
+
+### 15. Serializer Rules
+- **Use Symfony Serializer for all API responses** — inject `SerializerInterface` via constructor
+- **Define `#[Groups]` on entity properties**, not on controller response arrays
+- **Serialization groups naming convention:**
+  - `{entity}:read` — Full details for list/detail endpoints
+  - `{entity}:brief` — Minimal info for nested/related entity references
+- **Circular references** are handled via `App\Serializer\CircularReferenceHandler` which returns the object's ID
+- **DateTime fields** are automatically serialized in RFC3339 format by Symfony's `DateTimeNormalizer`
+- **Flat arrays** (e.g. permission IDs list) should use `#[SerializedName]` on a dedicated getter method rather than serializing the full collection

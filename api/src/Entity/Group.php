@@ -6,7 +6,11 @@ use App\Repository\GroupRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
+#[Gedmo\SoftDeleteable(fieldName: 'deletedAt')]
 #[ORM\Entity(repositoryClass: GroupRepository::class)]
 #[ORM\Table(name: 'groups')]
 class Group
@@ -14,10 +18,19 @@ class Group
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['group:read', 'group:brief', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['group:read', 'group:brief', 'user:read'])]
     private ?string $name = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[Groups(['group:read'])]
+    private bool $status = true;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $deletedAt = null;
 
     #[ORM\OneToMany(mappedBy: 'group', targetEntity: GroupPermission::class)]
     private Collection $groupPermissions;
@@ -44,6 +57,28 @@ class Group
     public function setName(string $name): self
     {
         $this->name = $name;
+        return $this;
+    }
+
+    public function isStatus(): bool
+    {
+        return $this->status;
+    }
+
+    public function setStatus(bool $status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deletedAt): self
+    {
+        $this->deletedAt = $deletedAt;
         return $this;
     }
 
@@ -79,6 +114,13 @@ class Group
     /**
      * @return Collection<int, UserGroup>
      */
+    #[Groups(['group:read'])]
+    #[SerializedName('groupPermissions')]
+    public function getPermissionIds(): array
+    {
+        return $this->groupPermissions->map(fn(GroupPermission $gp) => $gp->getPermission()->getId())->toArray();
+    }
+
     public function getUserGroups(): Collection
     {
         return $this->userGroups;

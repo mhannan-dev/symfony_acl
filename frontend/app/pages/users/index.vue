@@ -24,6 +24,7 @@
             <th class="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Name</th>
             <th class="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Email</th>
             <th class="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Groups</th>
+            <th class="text-center text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Status</th>
             <th class="text-right text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Actions</th>
           </tr>
         </thead>
@@ -37,13 +38,21 @@
               </span>
               <span v-if="!user.userGroups.length" class="text-slate-400">&mdash;</span>
             </td>
+            <td class="px-6 py-4 text-center">
+              <button @click="toggleStatus(user)" :disabled="toggling === user.id"
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                :class="user.isActive ? 'bg-green-500' : 'bg-slate-300'">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform"
+                  :class="user.isActive ? 'translate-x-6' : 'translate-x-1'" />
+              </button>
+            </td>
             <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
               <ActionIconButton v-if="hasPermission('change_user')" :to="`/users/${user.id}`" icon="heroicons:pencil-square" title="Edit" color="blue" />
               <ActionIconButton v-if="hasPermission('delete_user')" @click="confirmDelete(user.id)" icon="heroicons:trash" title="Delete" color="red" />
             </td>
           </tr>
           <tr v-if="!users.length">
-            <td colspan="4" class="px-6 py-12 text-center text-sm text-slate-400">No users found.</td>
+            <td colspan="5" class="px-6 py-12 text-center text-sm text-slate-400">No users found.</td>
           </tr>
         </tbody>
       </table>
@@ -80,6 +89,7 @@ const searchQuery = ref('')
 
 const isDeleteModalOpen = ref(false)
 const itemToDelete = ref<number | null>(null)
+const toggling = ref<number | null>(null)
 
 onMounted(() => loadUsers())
 
@@ -107,6 +117,18 @@ async function loadUsers(p?: number) {
 function confirmDelete(id: number) {
   itemToDelete.value = id
   isDeleteModalOpen.value = true
+}
+
+async function toggleStatus(user: any) {
+  toggling.value = user.id
+  const { data, error } = await useApi().patch(`/users/${user.id}/toggle-status`)
+  toggling.value = null
+  if (error) {
+    useToast().error(error)
+    return
+  }
+  user.isActive = data.isActive
+  useToast().success(`User ${data.isActive ? 'activated' : 'deactivated'} successfully`)
 }
 
 async function executeDelete() {

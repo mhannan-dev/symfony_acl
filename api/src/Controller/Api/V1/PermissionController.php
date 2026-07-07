@@ -11,12 +11,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/v1/permissions')]
 class PermissionController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
+        private readonly SerializerInterface $serializer,
     ) {
     }
 
@@ -43,19 +45,8 @@ class PermissionController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        $data = array_map(fn(Permission $perm) => [
-            'id' => $perm->getId(),
-            'name' => $perm->getName(),
-            'codename' => $perm->getCodename(),
-            'contentType' => $perm->getContentType() ? [
-                'id' => $perm->getContentType()->getId(),
-                'appLabel' => $perm->getContentType()->getAppLabel(),
-                'model' => $perm->getContentType()->getModel(),
-            ] : null,
-        ], $permissions);
-
         return $this->json([
-            'permissions' => $data,
+            'permissions' => $this->serializer->normalize($permissions, null, ['groups' => ['permission:read']]),
             'pagination' => [
                 'currentPage' => $page,
                 'perPage' => $perPage,
@@ -69,9 +60,12 @@ class PermissionController extends AbstractController
     #[IsGranted('add_permission')]
     public function new(ContentTypeRepository $ctRepo): JsonResponse
     {
-        $contentTypes = array_map(fn($ct) => ['id' => $ct->getId(), 'appLabel' => $ct->getAppLabel(), 'model' => $ct->getModel()], $ctRepo->findAll());
+        $contentTypes = $ctRepo->findAll();
 
-        return $this->json(['permission' => null, 'contentTypes' => $contentTypes]);
+        return $this->json([
+            'permission' => null,
+            'contentTypes' => $this->serializer->normalize($contentTypes, null, ['groups' => ['content_type:read']]),
+        ]);
     }
 
     #[Route('/save', name: 'api_v1_permissions_save', methods: ['POST'])]
@@ -92,23 +86,20 @@ class PermissionController extends AbstractController
         $this->em->persist($permission);
         $this->em->flush();
 
-        return $this->json(['permission' => ['id' => $permission->getId(), 'name' => $permission->getName(), 'codename' => $permission->getCodename()]]);
+        return $this->json([
+            'permission' => $this->serializer->normalize($permission, null, ['groups' => ['permission:brief']]),
+        ]);
     }
 
     #[Route('/{id}/edit', name: 'api_v1_permissions_edit_form', methods: ['GET'])]
     #[IsGranted('change_permission')]
     public function edit(Permission $permission, ContentTypeRepository $ctRepo): JsonResponse
     {
-        $contentTypes = array_map(fn($ct) => ['id' => $ct->getId(), 'appLabel' => $ct->getAppLabel(), 'model' => $ct->getModel()], $ctRepo->findAll());
+        $contentTypes = $ctRepo->findAll();
 
         return $this->json([
-            'permission' => [
-                'id' => $permission->getId(),
-                'name' => $permission->getName(),
-                'codename' => $permission->getCodename(),
-                'contentType' => $permission->getContentType() ? ['id' => $permission->getContentType()->getId()] : null,
-            ],
-            'contentTypes' => $contentTypes,
+            'permission' => $this->serializer->normalize($permission, null, ['groups' => ['permission:read']]),
+            'contentTypes' => $this->serializer->normalize($contentTypes, null, ['groups' => ['content_type:read']]),
         ]);
     }
 

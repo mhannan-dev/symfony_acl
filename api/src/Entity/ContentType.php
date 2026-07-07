@@ -6,6 +6,7 @@ use App\Repository\ContentTypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ContentTypeRepository::class)]
 #[ORM\Table(name: 'content_types')]
@@ -14,12 +15,15 @@ class ContentType
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['content_type:read', 'content_type:brief', 'permission:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['content_type:read', 'content_type:brief', 'permission:read', 'activity_log:read'])]
     private ?string $appLabel = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['content_type:read', 'content_type:brief', 'permission:read'])]
     private ?string $model = null;
 
     #[ORM\OneToMany(mappedBy: 'contentType', targetEntity: Permission::class)]

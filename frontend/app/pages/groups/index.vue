@@ -22,6 +22,7 @@
         <thead>
           <tr class="border-b border-slate-200 bg-slate-50">
             <th class="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Name</th>
+            <th class="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Status</th>
             <th class="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Permissions</th>
             <th class="text-right text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Actions</th>
           </tr>
@@ -29,6 +30,10 @@
         <tbody class="divide-y divide-slate-100">
           <tr v-for="group in groups" :key="group.id" class="hover:bg-slate-50">
             <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ group.name }}</td>
+            <td class="px-6 py-4">
+              <span v-if="group.status" class="bg-green-50 text-green-700 text-xs font-medium px-2.5 py-0.5 rounded-md border border-green-200">Active</span>
+              <span v-else class="bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-0.5 rounded-md border border-slate-200">Inactive</span>
+            </td>
             <td class="px-6 py-4 text-sm text-slate-500">{{ group.groupPermissions.length }}</td>
             <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
               <ActionIconButton v-if="hasPermission('change_group')" :to="`/groups/${group.id}`" icon="heroicons:pencil-square" title="Edit" color="blue" />

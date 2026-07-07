@@ -30,13 +30,13 @@
 
       <div>
         <label class="block text-sm font-medium text-slate-700 mb-2">Groups</label>
-        <div class="space-y-2 max-h-48 overflow-y-auto border border-slate-200 rounded-lg p-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 border border-slate-200 rounded-lg p-3">
           <label v-for="group in groups" :key="group.id" class="flex items-center gap-3 cursor-pointer">
             <input type="checkbox" :value="group.id" v-model="form.groupIds"
               class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
             <span class="text-sm text-slate-700">{{ group.name }}</span>
           </label>
-          <p v-if="!groups.length" class="text-sm text-slate-400 text-center py-2">No groups available.</p>
+          <p v-if="!groups.length" class="text-sm text-slate-400 text-center py-2 col-span-full">No groups available.</p>
         </div>
       </div>
 

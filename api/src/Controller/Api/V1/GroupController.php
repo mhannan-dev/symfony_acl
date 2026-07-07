@@ -13,12 +13,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/v1/groups')]
 class GroupController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
+        private readonly SerializerInterface $serializer,
     ) {
     }
 
@@ -44,17 +46,8 @@ class GroupController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        $data = array_map(fn(Group $group) => [
-            'id' => $group->getId(),
-            'name' => $group->getName(),
-            'groupPermissions' => array_map(
-                fn($gp) => $gp->getPermission()->getId(),
-                $group->getGroupPermissions()->toArray()
-            ),
-        ], $groups);
-
         return $this->json([
-            'groups' => $data,
+            'groups' => $this->serializer->normalize($groups, null, ['groups' => ['group:read']]),
             'pagination' => [
                 'currentPage' => $page,
                 'perPage' => $perPage,
@@ -68,9 +61,13 @@ class GroupController extends AbstractController
     #[IsGranted('add_group')]
     public function new(PermissionRepository $permRepo): JsonResponse
     {
-        $permissions = array_map(fn($p) => ['id' => $p->getId(), 'name' => $p->getName(), 'codename' => $p->getCodename()], $permRepo->findAll());
+        $permissions = $permRepo->findAll();
 
-        return $this->json(['group' => null, 'permissions' => $permissions, 'groupPermissionIds' => []]);
+        return $this->json([
+            'group' => null,
+            'permissions' => $this->serializer->normalize($permissions, null, ['groups' => ['permission:brief']]),
+            'groupPermissionIds' => [],
+        ]);
     }
 
     #[Route('/save', name: 'api_v1_groups_save', methods: ['POST'])]
@@ -90,8 +87,7 @@ class GroupController extends AbstractController
             $this->em->remove($gp);
         }
         $group->getGroupPermissions()->clear();
-        $this->em->flush(); // Flush the DELETEs first to avoid unique constraint violations
-
+        $this->em->flush();
 
         $selectedPermIds = $data['permissionIds'] ?? [];
         foreach ($selectedPermIds as $permId) {
@@ -108,19 +104,21 @@ class GroupController extends AbstractController
         $this->em->persist($group);
         $this->em->flush();
 
-        return $this->json(['group' => ['id' => $group->getId(), 'name' => $group->getName()]]);
+        return $this->json([
+            'group' => $this->serializer->normalize($group, null, ['groups' => ['group:brief']]),
+        ]);
     }
 
     #[Route('/{id}/edit', name: 'api_v1_groups_edit_form', methods: ['GET'])]
     #[IsGranted('change_group')]
     public function edit(Group $group, PermissionRepository $permRepo): JsonResponse
     {
-        $permissions = array_map(fn($p) => ['id' => $p->getId(), 'name' => $p->getName(), 'codename' => $p->getCodename()], $permRepo->findAll());
+        $permissions = $permRepo->findAll();
         $groupPermissionIds = array_map(fn($gp) => $gp->getPermission()->getId(), $group->getGroupPermissions()->toArray());
 
         return $this->json([
-            'group' => ['id' => $group->getId(), 'name' => $group->getName()],
-            'permissions' => $permissions,
+            'group' => $this->serializer->normalize($group, null, ['groups' => ['group:read']]),
+            'permissions' => $this->serializer->normalize($permissions, null, ['groups' => ['permission:brief']]),
             'groupPermissionIds' => $groupPermissionIds,
         ]);
     }

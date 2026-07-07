@@ -69,5 +69,12 @@ export function useApi() {
     return request<T>(path, { method: 'DELETE' })
   }
 
-  return { get, post, del }
+  function patch<T>(path: string, body?: unknown): Promise<ApiResponse<T>> {
+    return request<T>(path, {
+      method: 'PATCH',
+      body: body ? JSON.stringify(body) : undefined,
+    })
+  }
+
+  return { get, post, del, patch }
 }
