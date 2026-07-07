@@ -5,10 +5,10 @@ namespace App\Controller\Api\V1;
 use App\Entity\ContentType;
 use App\Repository\ContentTypeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/v1/content-types')]
 class ContentTypeController extends AbstractController

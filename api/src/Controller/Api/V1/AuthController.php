@@ -8,6 +8,7 @@ use App\DTO\LoginRequest;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +23,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class AuthController extends AbstractController
 {
     use ApiResponseTrait;
+
+    public function __construct(
+        private readonly SerializerInterface $serializer
+    ) {
+    }
 
     #[Route('/login', name: 'api_v1_login', methods: ['POST'])]
     public function login(
@@ -44,15 +50,12 @@ class AuthController extends AbstractController
             $permissionCheckService->getUserPermissions($user)
         )));
 
+        $userData = $this->serializer->normalize($user, null, ['groups' => ['user:read']]);
+        $userData['roles'] = $user->getRoles();
+        $userData['permissions'] = $permissions;
+
         return $this->apiSuccess([
-            'user' => [
-                'id' => $user->getId(),
-                'name' => $user->getName(),
-                'email' => $user->getEmail(),
-                'roles' => $user->getRoles(),
-                'isActive' => $user->isActive(),
-                'permissions' => $permissions,
-            ],
+            'user' => $userData,
         ]);
     }
 
@@ -77,15 +80,12 @@ class AuthController extends AbstractController
             $permissionCheckService->getUserPermissions($user)
         )));
 
+        $userData = $this->serializer->normalize($user, null, ['groups' => ['user:read']]);
+        $userData['roles'] = $user->getRoles();
+        $userData['permissions'] = $permissions;
+
         return $this->apiSuccess([
-            'user' => [
-                'id' => $user->getId(),
-                'name' => $user->getName(),
-                'email' => $user->getEmail(),
-                'roles' => $user->getRoles(),
-                'isActive' => $user->isActive(),
-                'permissions' => $permissions,
-            ],
+            'user' => $userData,
         ]);
     }
 
@@ -125,15 +125,12 @@ class AuthController extends AbstractController
             $permissionCheckService->getUserPermissions($user)
         )));
 
+        $userData = $this->serializer->normalize($user, null, ['groups' => ['user:read']]);
+        $userData['roles'] = $user->getRoles();
+        $userData['permissions'] = $permissions;
+
         return $this->apiSuccess([
-            'user' => [
-                'id' => $user->getId(),
-                'name' => $user->getName(),
-                'email' => $user->getEmail(),
-                'roles' => $user->getRoles(),
-                'isActive' => $user->isActive(),
-                'permissions' => $permissions,
-            ],
+            'user' => $userData,
             'message' => 'Profile updated successfully.'
         ]);
     }

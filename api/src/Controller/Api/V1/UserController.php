@@ -8,16 +8,19 @@ use App\Repository\GroupRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\Serializer\SerializerInterface;
+use App\Controller\Api\ApiResponseTrait;
 
 #[Route('/api/v1/users')]
 class UserController extends AbstractController
 {
+    use ApiResponseTrait;
+
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly UserPasswordHasherInterface $hasher,
@@ -47,7 +50,7 @@ class UserController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        return $this->json([
+        return $this->apiSuccess([
             'users' => $this->serializer->normalize($users, null, ['groups' => ['user:read']]),
             'pagination' => [
                 'currentPage' => $page,
@@ -64,7 +67,7 @@ class UserController extends AbstractController
     {
         $groups = $groupRepo->findAll();
 
-        return $this->json([
+        return $this->apiSuccess([
             'groups' => $this->serializer->normalize($groups, null, ['groups' => ['group:brief']]),
             'user' => null,
             'userGroupIds' => [],
@@ -106,7 +109,7 @@ class UserController extends AbstractController
         $this->em->persist($user);
         $this->em->flush();
 
-        return $this->json([
+        return $this->apiSuccess([
             'user' => $this->serializer->normalize($user, null, ['groups' => ['user:brief']]),
         ]);
     }
@@ -118,7 +121,7 @@ class UserController extends AbstractController
         $groups = $groupRepo->findAll();
         $userGroupIds = array_map(fn($ug) => $ug->getGroup()->getId(), $user->getUserGroups()->toArray());
 
-        return $this->json([
+        return $this->apiSuccess([
             'user' => $this->serializer->normalize($user, null, ['groups' => ['user:read']]),
             'groups' => $this->serializer->normalize($groups, null, ['groups' => ['group:brief']]),
             'userGroupIds' => $userGroupIds,
@@ -132,7 +135,7 @@ class UserController extends AbstractController
         $user->setIsActive(!$user->isActive());
         $this->em->flush();
 
-        return $this->json([
+        return $this->apiSuccess([
             'id' => $user->getId(),
             'isActive' => $user->isActive(),
         ]);
@@ -145,6 +148,6 @@ class UserController extends AbstractController
         $this->em->remove($user);
         $this->em->flush();
 
-        return $this->json(['message' => 'User deleted.']);
+        return $this->apiSuccess(['message' => 'User deleted.']);
     }
 }

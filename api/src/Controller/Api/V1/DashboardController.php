@@ -12,6 +12,7 @@ use App\Repository\PermissionRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -20,6 +21,7 @@ class DashboardController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
+        private readonly SerializerInterface $serializer,
     ) {
     }
 
@@ -139,7 +141,7 @@ class DashboardController extends AbstractController
             'children' => $schemaTreeNodes
         ];
 
-        return $this->json([
+        $responseData = [
             'stats' => [
                 'users' => $userRepo->count([]),
                 'groups' => $groupRepo->count([]),
@@ -153,6 +155,8 @@ class DashboardController extends AbstractController
                 'userTree' => $userTree,
                 'schemaTree' => $schemaTree,
             ],
-        ]);
+        ];
+
+        return $this->json($this->serializer->normalize($responseData));
     }
 }
