@@ -123,6 +123,19 @@ class GroupController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/toggle-status', name: 'api_v1_groups_toggle_status', methods: ['PATCH'])]
+    #[IsGranted('change_group')]
+    public function toggleStatus(Group $group): JsonResponse
+    {
+        $group->setStatus(!$group->isStatus());
+        $this->em->flush();
+
+        return $this->json([
+            'id' => $group->getId(),
+            'status' => $group->isStatus(),
+        ]);
+    }
+
     #[Route('/{id}/delete', name: 'api_v1_groups_delete', methods: ['DELETE'])]
     #[IsGranted('delete_group')]
     public function delete(Group $group): JsonResponse

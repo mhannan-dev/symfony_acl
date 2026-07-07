@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: ContentTypeRepository::class)]
 #[ORM\Table(name: 'content_types')]
@@ -68,6 +69,13 @@ class ContentType
     /**
      * @return Collection<int, Permission>
      */
+    #[Groups(['content_type:read'])]
+    #[SerializedName('permissions')]
+    public function getPermissionIds(): array
+    {
+        return $this->permissions->map(fn(Permission $p) => $p->getId())->toArray();
+    }
+
     public function getPermissions(): Collection
     {
         return $this->permissions;

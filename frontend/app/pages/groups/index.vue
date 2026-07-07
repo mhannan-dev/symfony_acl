@@ -30,9 +30,13 @@
         <tbody class="divide-y divide-slate-100">
           <tr v-for="group in groups" :key="group.id" class="hover:bg-slate-50">
             <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ group.name }}</td>
-            <td class="px-6 py-4">
-              <span v-if="group.status" class="bg-green-50 text-green-700 text-xs font-medium px-2.5 py-0.5 rounded-md border border-green-200">Active</span>
-              <span v-else class="bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-0.5 rounded-md border border-slate-200">Inactive</span>
+            <td class="px-6 py-4 text-center">
+              <button @click="toggleStatus(group)" :disabled="toggling === group.id"
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                :class="group.status ? 'bg-green-500' : 'bg-slate-300'">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform"
+                  :class="group.status ? 'translate-x-6' : 'translate-x-1'" />
+              </button>
             </td>
             <td class="px-6 py-4 text-sm text-slate-500">{{ group.groupPermissions.length }}</td>
             <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
@@ -78,6 +82,7 @@ const searchQuery = ref('')
 
 const isDeleteModalOpen = ref(false)
 const itemToDelete = ref<number | null>(null)
+const toggling = ref<number | null>(null)
 
 onMounted(() => loadGroups())
 
@@ -105,6 +110,18 @@ async function loadGroups(p?: number) {
 function confirmDelete(id: number) {
   itemToDelete.value = id
   isDeleteModalOpen.value = true
+}
+
+async function toggleStatus(group: any) {
+  toggling.value = group.id
+  const { data, error } = await useApi().patch(`/groups/${group.id}/toggle-status`)
+  toggling.value = null
+  if (error) {
+    useToast().error(error)
+    return
+  }
+  group.status = data.status
+  useToast().success(`Group ${data.status ? 'activated' : 'deactivated'} successfully`)
 }
 
 async function executeDelete() {
