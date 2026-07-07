@@ -10,8 +10,10 @@ use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Service\PermissionCheckService;
 use App\Controller\Api\ApiResponseTrait;
 use Symfony\Component\Routing\Annotation\Route;
@@ -84,6 +86,55 @@ class AuthController extends AbstractController
                 'isActive' => $user->isActive(),
                 'permissions' => $permissions,
             ],
+        ]);
+    }
+
+    #[Route('/profile', name: 'api_v1_profile_update', methods: ['POST'])]
+    public function updateProfile(
+        Request $request,
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $passwordHasher,
+        PermissionCheckService $permissionCheckService
+    ): JsonResponse {
+        /** @var User|null $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->apiError('Not authenticated.', Response::HTTP_UNAUTHORIZED);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!empty($data['name'])) {
+            $user->setName($data['name']);
+        }
+
+        if (!empty($data['email'])) {
+            // In a real app, you might want to check for duplicate emails here
+            $user->setEmail($data['email']);
+        }
+
+        if (!empty($data['password'])) {
+            $user->setPassword($passwordHasher->hashPassword($user, $data['password']));
+        }
+
+        $em->flush();
+
+        $permissions = array_values(array_filter(array_map(
+            fn($p) => $p['codename'] ?? null,
+            $permissionCheckService->getUserPermissions($user)
+        )));
+
+        return $this->apiSuccess([
+            'user' => [
+                'id' => $user->getId(),
+                'name' => $user->getName(),
+                'email' => $user->getEmail(),
+                'roles' => $user->getRoles(),
+                'isActive' => $user->isActive(),
+                'permissions' => $permissions,
+            ],
+            'message' => 'Profile updated successfully.'
         ]);
     }
 

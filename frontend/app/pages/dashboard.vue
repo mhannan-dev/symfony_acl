@@ -58,23 +58,21 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl border border-slate-200 p-6">
           <h3 class="text-sm font-semibold text-slate-700 mb-4">Users per Group</h3>
-          <Pie :data="usersPerGroupChart" :options="chartOptions" />
+          <apexchart type="pie" height="280" :options="pieOptions" :series="usersPerGroupSeries" />
         </div>
 
-        <div class="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 class="text-sm font-semibold text-slate-700 mb-4">User Status</h3>
-          <Doughnut :data="userStatusChart" :options="chartOptions" />
-        </div>
 
         <div class="bg-white rounded-xl border border-slate-200 p-6">
           <h3 class="text-sm font-semibold text-slate-700 mb-4">Permissions per Content Type</h3>
-          <Pie :data="permsPerTypeChart" :options="chartOptions" />
+          <apexchart type="pie" height="280" :options="pieOptions" :series="permsPerTypeSeries" />
         </div>
 
-        <div class="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 class="text-sm font-semibold text-slate-700 mb-4">Activity (Last 7 Days)</h3>
-          <Line :data="activityChart" :options="lineChartOptions" />
-        </div>
+        
+      </div>
+
+      <div class="mt-6 bg-white rounded-xl border border-slate-200 p-6">
+        <h3 class="text-sm font-semibold text-slate-700 mb-4">Users Organization</h3>
+        <div id="apex-tree-container" class="w-full" style="height: 500px; overflow: hidden;"></div>
       </div>
     </template>
   </div>
@@ -82,20 +80,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Pie, Doughnut, Line } from 'vue-chartjs'
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-} from 'chart.js'
-
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler)
+import ApexTree from 'apextree'
 
 definePageMeta({
   layout: 'admin',
@@ -107,79 +92,159 @@ const loading = ref(true)
 const stats = ref({ users: 0, groups: 0, permissions: 0, recentActivity: 0 })
 const charts = ref({
   usersPerGroup: [] as { name: string; count: number }[],
-  userStatus: [] as { label: string; count: number }[],
   permissionsPerContentType: [] as { app_label: string; model: string; count: number }[],
   activityLast7Days: [] as { date: string; count: number }[],
 })
 
 const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1']
 
-const chartOptions = {
-  responsive: true,
-  plugins: {
-    legend: { position: 'bottom' as const, labels: { usePointStyle: true, padding: 16 } },
-  },
+const pieOptions = {
+  labels: [] as string[],
+  chart: { type: 'pie' as const },
+  colors,
+  legend: { position: 'bottom' as const, fontSize: '13px', itemMargin: { horizontal: 12 } },
+  dataLabels: { enabled: false },
+  responsive: [{ breakpoint: 480, options: { chart: { height: 240 }, legend: { position: 'bottom' } } }],
 }
 
-const lineChartOptions = {
-  responsive: true,
-  plugins: {
-    legend: { display: false },
+
+const areaOptions = {
+  chart: {
+    type: 'area' as const,
+    toolbar: { show: false },
+    zoom: { enabled: false },
   },
-  scales: {
-    y: { beginAtZero: true, ticks: { stepSize: 1 } },
-    x: { grid: { display: false } },
+  colors: ['#3b82f6'],
+  fill: {
+    type: 'gradient',
+    gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, stops: [0, 100] },
   },
-  elements: {
-    line: { tension: 0.35, fill: true },
-  },
+  dataLabels: { enabled: false },
+  stroke: { curve: 'smooth' as const, width: 2 },
+  xaxis: { type: 'category' as const, axisBorder: { show: false }, axisTicks: { show: false }, categories: [] as string[] },
+  yaxis: { min: 0, forceNiceScale: true },
+  grid: { borderColor: '#f1f5f9', padding: { left: 0, right: 0 } },
+  tooltip: { enabled: true },
+  legend: { show: false },
 }
 
-const usersPerGroupChart = computed(() => ({
-  labels: charts.value.usersPerGroup.map(g => g.name),
-  datasets: [{
-    data: charts.value.usersPerGroup.map(g => g.count),
-    backgroundColor: colors.slice(0, charts.value.usersPerGroup.length),
-    borderWidth: 0,
-  }],
-}))
+const usersPerGroupSeries = computed(() => {
+  const data = charts.value.usersPerGroup
+  pieOptions.labels = data.map(g => g.name)
+  return data.map(g => g.count)
+})
 
-const userStatusChart = computed(() => ({
-  labels: charts.value.userStatus.map(s => s.label),
-  datasets: [{
-    data: charts.value.userStatus.map(s => s.count),
-    backgroundColor: ['#10b981', '#ef4444'],
-    borderWidth: 0,
-  }],
-}))
 
-const permsPerTypeChart = computed(() => ({
-  labels: charts.value.permissionsPerContentType.map(p => `${p.app_label} / ${p.model}`),
-  datasets: [{
-    data: charts.value.permissionsPerContentType.map(p => p.count),
-    backgroundColor: colors.slice(0, charts.value.permissionsPerContentType.length),
-    borderWidth: 0,
-  }],
-}))
+const permsPerTypeSeries = computed(() => {
+  const data = charts.value.permissionsPerContentType
+  pieOptions.labels = data.map(p => `${p.app_label} / ${p.model}`)
+  return data.map(p => p.count)
+})
 
-const activityChart = computed(() => ({
-  labels: charts.value.activityLast7Days.map(a => a.date),
-  datasets: [{
-    label: 'Actions',
-    data: charts.value.activityLast7Days.map(a => a.count),
-    borderColor: '#3b82f6',
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    pointBackgroundColor: '#3b82f6',
-    pointRadius: 4,
-    borderWidth: 2,
-  }],
-}))
+const activitySeries = computed(() => {
+  const data = charts.value.activityLast7Days
+  areaOptions.xaxis = { ...areaOptions.xaxis, categories: data.map(a => a.date) }
+  return [{ name: 'Actions', data: data.map(a => a.count) }]
+})
 
 onMounted(async () => {
-  const { data } = await get<{ stats: typeof stats.value; charts: typeof charts.value }>('/dashboard/stats')
+  const { data } = await get<{ stats: typeof stats.value; charts: typeof charts.value & { userTree?: any } }>('/dashboard/stats')
   if (data) {
     stats.value = data.stats
-    if (data.charts) charts.value = data.charts
+    if (data.charts) {
+      charts.value = data.charts
+      
+      if (data.charts.userTree) {
+        
+        const transformTree = (node: any, level: number = 0): any => {
+          const getInitials = (name: string) => {
+            return name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'U'
+          }
+
+          let color = 'blue'
+          let badge = 'SYSTEM'
+          let subtitle = 'Application'
+          
+          if (level === 1) {
+            color = 'green'
+            badge = 'GROUP'
+            subtitle = 'Role Definition'
+          } else if (level === 2) {
+            color = 'orange'
+            badge = 'USER'
+            subtitle = 'Active Member'
+          }
+
+          return {
+            id: node.id,
+            data: {
+              name: node.name,
+              initials: getInitials(node.name),
+              color,
+              badge,
+              subtitle
+            },
+            children: node.children ? node.children.map((c: any) => transformTree(c, level + 1)) : []
+          }
+        }
+
+        const formattedTree = transformTree(data.charts.userTree)
+
+        setTimeout(() => {
+          const treeContainer = document.getElementById('apex-tree-container')
+          if (treeContainer) {
+            const treeOptions = {
+              width: '100%',
+              height: 500,
+              direction: 'left' as const,
+              contentKey: 'data',
+              nodeWidth: 260,
+              nodeHeight: 75,
+              childrenSpacing: 80,
+              siblingSpacing: 25,
+              canvasStyle: 'background: transparent;',
+              nodeTemplate: (content: any) => {
+                let borderClass = 'border-blue-200'
+                let bgClass = 'bg-blue-100'
+                let textClass = 'text-blue-700'
+                let badgeBg = 'bg-blue-500'
+                
+                if (content.color === 'green') {
+                  borderClass = 'border-emerald-200'
+                  bgClass = 'bg-emerald-100'
+                  textClass = 'text-emerald-700'
+                  badgeBg = 'bg-emerald-500'
+                } else if (content.color === 'orange') {
+                  borderClass = 'border-amber-200'
+                  bgClass = 'bg-amber-100'
+                  textClass = 'text-amber-700'
+                  badgeBg = 'bg-amber-500'
+                }
+
+                return `
+                  <div class="flex items-center justify-between w-[260px] h-[75px] p-3 bg-white border-2 ${borderClass} rounded-xl shadow-sm box-border">
+                    <div class="flex items-center gap-3 w-full max-w-[170px]">
+                      <div class="flex items-center justify-center min-w-10 min-h-10 w-10 h-10 ${bgClass} rounded-full shrink-0">
+                        <span class="text-sm font-bold ${textClass}">${content.initials}</span>
+                      </div>
+                      <div class="flex flex-col truncate">
+                        <span class="text-[14px] font-bold text-slate-800 leading-tight truncate">${content.name}</span>
+                        <span class="text-[11px] text-slate-500 mt-0.5 truncate">${content.subtitle}</span>
+                      </div>
+                    </div>
+                    <div class="px-2 py-1 ${badgeBg} rounded-full shrink-0 ml-2">
+                      <span class="text-[9px] font-bold text-white uppercase tracking-wider">${content.badge}</span>
+                    </div>
+                  </div>
+                `
+              }
+            }
+            const tree = new ApexTree(treeContainer, treeOptions)
+            tree.render(formattedTree)
+          }
+        }, 100)
+      }
+    }
   }
   loading.value = false
 })

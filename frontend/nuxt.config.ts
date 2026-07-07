@@ -2,6 +2,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  extends: [
+    './layers/shared',
+    './layers/features/auth',
+  ],
+
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxt/icon'

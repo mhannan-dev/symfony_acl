@@ -34,10 +34,10 @@
               </div>
               <ul class="py-1 font-light text-gray-500 dark:text-gray-400">
                 <li>
-                  <a href="#" class="flex items-center gap-2 py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                  <NuxtLink to="/profile" class="flex items-center gap-2 py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white transition-colors">
                     <Icon name="heroicons:user-circle" class="w-4 h-4" />
                     My profile
-                  </a>
+                  </NuxtLink>
                 </li>
               </ul>
               <ul class="py-1 font-light text-gray-500 dark:text-gray-400">

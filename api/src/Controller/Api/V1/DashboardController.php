@@ -41,8 +41,6 @@ class DashboardController extends AbstractController
              ORDER BY count DESC'
         );
 
-        $activeUsers = (int) $conn->fetchOne('SELECT COUNT(*) FROM users WHERE is_active = 1');
-        $inactiveUsers = (int) $conn->fetchOne('SELECT COUNT(*) FROM users WHERE is_active = 0');
 
         $permsPerContentType = $conn->fetchAllAssociative(
             'SELECT ct.app_label, ct.model, COUNT(p.id) as count
@@ -56,9 +54,55 @@ class DashboardController extends AbstractController
             'SELECT DATE_FORMAT(action_time, \'%Y-%m-%d\') as date, COUNT(*) as count
              FROM activity_logs
              WHERE action_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-             GROUP BY DATE(action_time)
+             GROUP BY date
              ORDER BY date ASC'
         );
+
+        $userTreeRows = $conn->fetchAllAssociative(
+            'SELECT u.id as user_id, u.name as user_name, g.id as group_id, g.name as group_name
+             FROM users u
+             LEFT JOIN user_groups ug ON ug.user_id = u.id
+             LEFT JOIN `groups` g ON ug.group_id = g.id'
+        );
+
+        $groupsMap = [];
+        $unassigned = [];
+
+        foreach ($userTreeRows as $row) {
+            $uId = 'user_' . $row['user_id'] . '_' . (int)$row['group_id'];
+            $uName = $row['user_name'];
+            $gId = $row['group_id'] ? 'group_' . $row['group_id'] : null;
+            $gName = $row['group_name'];
+
+            $userNode = ['id' => $uId, 'name' => $uName];
+
+            if ($gId) {
+                if (!isset($groupsMap[$gId])) {
+                    $groupsMap[$gId] = [
+                        'id' => $gId,
+                        'name' => $gName,
+                        'children' => []
+                    ];
+                }
+                $groupsMap[$gId]['children'][] = $userNode;
+            } else {
+                $unassigned[] = $userNode;
+            }
+        }
+
+        if (!empty($unassigned)) {
+            $groupsMap['group_unassigned'] = [
+                'id' => 'group_unassigned',
+                'name' => 'Unassigned',
+                'children' => $unassigned
+            ];
+        }
+
+        $userTree = [
+            'id' => 'root',
+            'name' => 'System RBAC',
+            'children' => array_values($groupsMap)
+        ];
 
         return $this->json([
             'stats' => [
@@ -69,12 +113,9 @@ class DashboardController extends AbstractController
             ],
             'charts' => [
                 'usersPerGroup' => $usersPerGroup,
-                'userStatus' => [
-                    ['label' => 'Active', 'count' => $activeUsers],
-                    ['label' => 'Inactive', 'count' => $inactiveUsers],
-                ],
                 'permissionsPerContentType' => $permsPerContentType,
                 'activityLast7Days' => $recentLogs,
+                'userTree' => $userTree,
             ],
         ]);
     }
