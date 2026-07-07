@@ -100,8 +100,41 @@ class DashboardController extends AbstractController
 
         $userTree = [
             'id' => 'root',
-            'name' => 'System RBAC',
+            'name' => 'Symfony ACL Users',
             'children' => array_values($groupsMap)
+        ];
+
+        // Schema Tree
+        $schemaManager = $conn->createSchemaManager();
+        $tables = $schemaManager->listTables();
+
+        $schemaTreeNodes = [];
+        foreach ($tables as $table) {
+            $tableName = $table->getName();
+            if ($tableName === 'doctrine_migration_versions') continue;
+            
+            $columnNodes = [];
+            foreach ($table->getColumns() as $column) {
+                $typeClass = get_class($column->getType());
+                $typeName = str_replace('Type', '', basename(str_replace('\\', '/', $typeClass)));
+                
+                $columnNodes[] = [
+                    'id' => 'col_' . $tableName . '_' . $column->getName(),
+                    'name' => $column->getName(),
+                    'type' => $typeName
+                ];
+            }
+            $schemaTreeNodes[] = [
+                'id' => 'tbl_' . $tableName,
+                'name' => $tableName,
+                'children' => $columnNodes
+            ];
+        }
+
+        $schemaTree = [
+            'id' => 'schema_root',
+            'name' => 'Symfony ACL Database',
+            'children' => $schemaTreeNodes
         ];
 
         return $this->json([
@@ -116,6 +149,7 @@ class DashboardController extends AbstractController
                 'permissionsPerContentType' => $permsPerContentType,
                 'activityLast7Days' => $recentLogs,
                 'userTree' => $userTree,
+                'schemaTree' => $schemaTree,
             ],
         ]);
     }

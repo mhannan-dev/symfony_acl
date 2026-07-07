@@ -74,6 +74,11 @@
         <h3 class="text-sm font-semibold text-slate-700 mb-4">Users Organization</h3>
         <div id="apex-tree-container" class="w-full" style="height: 500px; overflow: hidden;"></div>
       </div>
+
+      <div class="mt-6 bg-white rounded-xl border border-slate-200 p-6">
+        <h3 class="text-sm font-semibold text-slate-700 mb-4">Database Schema</h3>
+        <div id="schema-tree-container" class="w-full" style="height: 600px; overflow: hidden;"></div>
+      </div>
     </template>
   </div>
 </template>
@@ -148,14 +153,13 @@ const activitySeries = computed(() => {
 })
 
 onMounted(async () => {
-  const { data } = await get<{ stats: typeof stats.value; charts: typeof charts.value & { userTree?: any } }>('/dashboard/stats')
+  const { data } = await get<{ stats: typeof stats.value; charts: typeof charts.value & { userTree?: any; schemaTree?: any } }>('/dashboard/stats')
   if (data) {
     stats.value = data.stats
     if (data.charts) {
       charts.value = data.charts
       
       if (data.charts.userTree) {
-        
         const transformTree = (node: any, level: number = 0): any => {
           const getInitials = (name: string) => {
             return name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'U'
@@ -193,15 +197,16 @@ onMounted(async () => {
         setTimeout(() => {
           const treeContainer = document.getElementById('apex-tree-container')
           if (treeContainer) {
+            treeContainer.innerHTML = ''
             const treeOptions = {
               width: '100%',
               height: 500,
               direction: 'left' as const,
               contentKey: 'data',
-              nodeWidth: 260,
-              nodeHeight: 75,
-              childrenSpacing: 80,
-              siblingSpacing: 25,
+              nodeWidth: 210,
+              nodeHeight: 56,
+              childrenSpacing: 60,
+              siblingSpacing: 16,
               canvasStyle: 'background: transparent;',
               nodeTemplate: (content: any) => {
                 let borderClass = 'border-blue-200'
@@ -222,18 +227,18 @@ onMounted(async () => {
                 }
 
                 return `
-                  <div class="flex items-center justify-between w-[260px] h-[75px] p-3 bg-white border-2 ${borderClass} rounded-xl shadow-sm box-border">
-                    <div class="flex items-center gap-3 w-full max-w-[170px]">
-                      <div class="flex items-center justify-center min-w-10 min-h-10 w-10 h-10 ${bgClass} rounded-full shrink-0">
-                        <span class="text-sm font-bold ${textClass}">${content.initials}</span>
+                  <div class="flex items-center justify-between w-[210px] h-[56px] p-2 bg-white border-2 ${borderClass} rounded-xl shadow-sm box-border">
+                    <div class="flex items-center gap-2 w-full max-w-[130px]">
+                      <div class="flex items-center justify-center min-w-8 min-h-8 w-8 h-8 ${bgClass} rounded-full shrink-0">
+                        <span class="text-xs font-bold ${textClass}">${content.initials}</span>
                       </div>
                       <div class="flex flex-col truncate">
-                        <span class="text-[14px] font-bold text-slate-800 leading-tight truncate">${content.name}</span>
-                        <span class="text-[11px] text-slate-500 mt-0.5 truncate">${content.subtitle}</span>
+                        <span class="text-[12px] font-bold text-slate-800 leading-tight truncate">${content.name}</span>
+                        <span class="text-[9px] text-slate-500 mt-0.5 truncate">${content.subtitle}</span>
                       </div>
                     </div>
-                    <div class="px-2 py-1 ${badgeBg} rounded-full shrink-0 ml-2">
-                      <span class="text-[9px] font-bold text-white uppercase tracking-wider">${content.badge}</span>
+                    <div class="px-1.5 py-0.5 ${badgeBg} rounded-full shrink-0 ml-1">
+                      <span class="text-[8px] font-bold text-white uppercase tracking-wider">${content.badge}</span>
                     </div>
                   </div>
                 `
@@ -241,6 +246,97 @@ onMounted(async () => {
             }
             const tree = new ApexTree(treeContainer, treeOptions)
             tree.render(formattedTree)
+          }
+        }, 100)
+      }
+
+      if (data.charts.schemaTree) {
+        const transformSchemaTree = (node: any, level: number = 0): any => {
+          const getInitials = (name: string) => {
+            return name.substring(0, 2).toUpperCase()
+          }
+
+          let color = 'blue'
+          let badge = 'DATABASE'
+          let subtitle = 'Symfony ACL'
+          
+          if (level === 1) {
+            color = 'green'
+            badge = 'TABLE'
+            subtitle = 'Entity'
+          } else if (level === 2) {
+            color = 'orange'
+            badge = node.type ? node.type.toUpperCase() : 'COLUMN'
+            subtitle = 'Field'
+          }
+
+          return {
+            id: node.id,
+            data: {
+              name: node.name,
+              initials: getInitials(node.name),
+              color,
+              badge,
+              subtitle
+            },
+            children: node.children ? node.children.map((c: any) => transformSchemaTree(c, level + 1)) : []
+          }
+        }
+
+        const formattedSchemaTree = transformSchemaTree(data.charts.schemaTree)
+
+        setTimeout(() => {
+          const schemaTreeContainer = document.getElementById('schema-tree-container')
+          if (schemaTreeContainer) {
+            schemaTreeContainer.innerHTML = ''
+            const schemaTreeOptions = {
+              width: '100%',
+              height: 600,
+              direction: 'left' as const,
+              contentKey: 'data',
+              nodeWidth: 210,
+              nodeHeight: 56,
+              childrenSpacing: 60,
+              siblingSpacing: 16,
+              canvasStyle: 'background: transparent;',
+              nodeTemplate: (content: any) => {
+                let borderClass = 'border-blue-200'
+                let bgClass = 'bg-blue-100'
+                let textClass = 'text-blue-700'
+                let badgeBg = 'bg-blue-500'
+                
+                if (content.color === 'green') {
+                  borderClass = 'border-emerald-200'
+                  bgClass = 'bg-emerald-100'
+                  textClass = 'text-emerald-700'
+                  badgeBg = 'bg-emerald-500'
+                } else if (content.color === 'orange') {
+                  borderClass = 'border-amber-200'
+                  bgClass = 'bg-amber-100'
+                  textClass = 'text-amber-700'
+                  badgeBg = 'bg-amber-500'
+                }
+
+                return `
+                  <div class="flex items-center justify-between w-[210px] h-[56px] p-2 bg-white border-2 ${borderClass} rounded-xl shadow-sm box-border">
+                    <div class="flex items-center gap-2 w-full max-w-[130px]">
+                      <div class="flex items-center justify-center min-w-8 min-h-8 w-8 h-8 ${bgClass} rounded-full shrink-0">
+                        <span class="text-xs font-bold ${textClass}">${content.initials}</span>
+                      </div>
+                      <div class="flex flex-col truncate">
+                        <span class="text-[12px] font-bold text-slate-800 leading-tight truncate">${content.name}</span>
+                        <span class="text-[9px] text-slate-500 mt-0.5 truncate">${content.subtitle}</span>
+                      </div>
+                    </div>
+                    <div class="px-1.5 py-0.5 ${badgeBg} rounded-full shrink-0 ml-1">
+                      <span class="text-[8px] font-bold text-white uppercase tracking-wider">${content.badge}</span>
+                    </div>
+                  </div>
+                `
+              }
+            }
+            const schemaTree = new ApexTree(schemaTreeContainer, schemaTreeOptions)
+            schemaTree.render(formattedSchemaTree)
           }
         }, 100)
       }
