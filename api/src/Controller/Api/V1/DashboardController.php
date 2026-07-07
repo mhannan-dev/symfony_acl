@@ -50,12 +50,14 @@ class DashboardController extends AbstractController
              ORDER BY count DESC'
         );
 
+        $sevenDaysAgo = (new \DateTime('-7 days'))->format('Y-m-d H:i:s');
         $recentLogs = $conn->fetchAllAssociative(
-            'SELECT DATE_FORMAT(action_time, \'%Y-%m-%d\') as date, COUNT(*) as count
+            'SELECT strftime(\'%Y-%m-%d\', action_time) as date, COUNT(*) as count
              FROM activity_logs
-             WHERE action_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+             WHERE action_time >= ?
              GROUP BY date
-             ORDER BY date ASC'
+             ORDER BY date ASC',
+            [$sevenDaysAgo]
         );
 
         $userTreeRows = $conn->fetchAllAssociative(
