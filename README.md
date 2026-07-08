@@ -19,8 +19,35 @@ While this project is built on modern, scalable technology, its primary goal is 
 
 The repository is split into two independent applications:
 
+```mermaid
+flowchart LR
+    Client([Web Client]) <-->|UI Interaction| Frontend[Nuxt 3 Frontend]
+    Frontend <-->|REST API / JSON| Backend[Symfony 6.4 API Backend]
+    Backend <-->|Doctrine ORM| Database[(Database)]
+```
+
 - **[`/api`](./api/)**: A strict Symfony 6.4+ RESTful API utilizing the Data Mapper pattern, request DTOs, and JWT/Session authentication.
 - **[`/frontend`](./frontend/)**: A standalone Nuxt (Vue 3) application providing the UI for the dashboard and permission management.
+
+---
+
+## 🧩 Coding Pattern
+
+The backend follows a clean architecture approach utilizing Request/Response DTOs and the Data Mapper pattern:
+
+```mermaid
+flowchart TD
+    Req([HTTP Request]) --> Ctrl[API Controller]
+    Ctrl -->|Maps & Validates| DTO[Request DTO]
+    Ctrl --> Svc[Application Service]
+    Svc -->|Reads| DTO
+    Svc <--> Repo[Doctrine Repository]
+    Repo <-->|Maps| Ent[Doctrine Entity]
+    Repo <--> DB[(Database)]
+    Svc -->|Returns| ResDTO[Response DTO]
+    Ctrl -->|Serializes| Res([HTTP JSON Response])
+    ResDTO -.-> Res
+```
 
 ---
 
