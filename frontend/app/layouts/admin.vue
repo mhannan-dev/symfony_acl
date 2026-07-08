@@ -14,7 +14,7 @@
             <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center shrink-0">
               <Icon name="heroicons:shield-check-solid" class="w-5 h-5 text-white" />
             </div>
-            <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">Symfony ACL</span>
+            <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">RBAC</span>
           </NuxtLink>
         </div>
         

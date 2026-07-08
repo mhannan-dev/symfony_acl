@@ -38,7 +38,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'Symfony ACL',
+      title: 'RBAC',
     },
   },
 })

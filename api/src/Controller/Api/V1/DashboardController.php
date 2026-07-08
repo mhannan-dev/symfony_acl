@@ -24,8 +24,7 @@ class DashboardController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly SerializerInterface $serializer,
-    ) {
-    }
+    ) {}
 
     #[Route('/dashboard/stats', name: 'api_v1_dashboard_stats', methods: ['GET'])]
     public function stats(
@@ -74,9 +73,9 @@ class DashboardController extends AbstractController
         $unassigned = [];
 
         foreach ($userTreeRows as $row) {
-            $uId = 'user_'.$row['user_id'].'_'.(int) $row['group_id'];
+            $uId = 'user_' . $row['user_id'] . '_' . (int) $row['group_id'];
             $uName = $row['user_name'];
-            $gId = $row['group_id'] ? 'group_'.$row['group_id'] : null;
+            $gId = $row['group_id'] ? 'group_' . $row['group_id'] : null;
             $gName = $row['group_name'];
 
             $userNode = ['id' => $uId, 'name' => $uName];
@@ -105,7 +104,7 @@ class DashboardController extends AbstractController
 
         $userTree = [
             'id' => 'root',
-            'name' => 'Symfony ACL Users',
+            'name' => 'RBAC Users',
             'children' => array_values($groupsMap),
         ];
 
@@ -126,13 +125,13 @@ class DashboardController extends AbstractController
                 $typeName = str_replace('Type', '', basename(str_replace('\\', '/', $typeClass)));
 
                 $columnNodes[] = [
-                    'id' => 'col_'.$tableName.'_'.$column->getName(),
+                    'id' => 'col_' . $tableName . '_' . $column->getName(),
                     'name' => $column->getName(),
                     'type' => $typeName,
                 ];
             }
             $schemaTreeNodes[] = [
-                'id' => 'tbl_'.$tableName,
+                'id' => 'tbl_' . $tableName,
                 'name' => $tableName,
                 'children' => $columnNodes,
             ];
@@ -140,7 +139,7 @@ class DashboardController extends AbstractController
 
         $schemaTree = [
             'id' => 'schema_root',
-            'name' => 'Symfony ACL Database',
+            'name' => 'RBAC Database',
             'children' => $schemaTreeNodes,
         ];
 

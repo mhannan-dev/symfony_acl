@@ -258,7 +258,7 @@ onMounted(async () => {
 
           let color = 'blue'
           let badge = 'DATABASE'
-          let subtitle = 'Symfony ACL'
+          let subtitle = 'RBAC'
           
           if (level === 1) {
             color = 'green'

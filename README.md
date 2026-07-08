@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🛡️ Symfony ACL Boilerplate</h1>
+  <h1>🛡️ RBAC Boilerplate</h1>
   <p><strong>Enterprise-Grade Role-Based Access Control (RBAC) & Decoupled Architecture</strong></p>
 
   <!-- TECH STACK BADGES -->
